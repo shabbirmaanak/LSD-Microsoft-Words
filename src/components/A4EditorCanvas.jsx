@@ -71,13 +71,6 @@ export default function A4EditorCanvas({
     }
   }, [editor, setEditorInstance]);
 
-  // Sync content if changed externally (e.g. template loaded)
-  useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, false);
-    }
-  }, [content, editor]);
-
   return (
     <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 no-print select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
       

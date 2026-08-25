@@ -193,6 +193,7 @@ export default function App() {
 
   // Select Template
   const handleSelectTemplate = (template) => {
+    setDocId('doc_' + Date.now());
     setDocTitle(template.title + '.docx');
     setContent(template.content);
     if (template.watermark) {
@@ -317,6 +318,7 @@ export default function App() {
       {/* 3. Main Workspace: A4 Editor Viewport + Helper Drawer */}
       <div className="flex-1 flex overflow-hidden relative">
         <A4EditorCanvas
+          key={docId}
           content={content}
           onContentChange={handleContentChange}
           watermark={watermark}
