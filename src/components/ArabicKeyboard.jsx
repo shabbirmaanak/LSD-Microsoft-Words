@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Keyboard, Sparkles } from 'lucide-react';
+import { X, Keyboard } from 'lucide-react';
 
 export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
   if (!isOpen) return null;
@@ -96,16 +96,16 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
   ];
 
   return (
-    <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-50 bg-[#1e293b] text-white rounded-xl shadow-2xl p-4 border border-slate-700 w-full max-w-3xl select-none arabic-keyboard-modal animate-in fade-in slide-in-from-bottom-5 duration-150">
+    <div className="fixed bottom-0 sm:bottom-12 left-0 sm:left-1/2 sm:-translate-x-1/2 z-50 bg-[#1e293b] text-white rounded-t-xl sm:rounded-xl shadow-2xl p-3 sm:p-4 border border-slate-700 w-full sm:max-w-3xl max-h-[85vh] overflow-y-auto select-none arabic-keyboard-modal animate-in fade-in slide-in-from-bottom-5 duration-150">
       
       {/* Header */}
-      <div className="flex items-center justify-between pb-2 mb-3 border-b border-slate-700">
+      <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-700">
         <div className="flex items-center gap-2">
-          <Keyboard className="w-5 h-5 text-[#046a38] bg-emerald-100 p-0.5 rounded" />
-          <h3 className="font-bold text-sm text-slate-100 font-serif">
-            Lisan al Dawat & Arabic On-Screen Keyboard
+          <Keyboard className="w-4 h-4 sm:w-5 sm:h-5 text-[#046a38] bg-emerald-100 p-0.5 rounded" />
+          <h3 className="font-bold text-xs sm:text-sm text-slate-100 font-serif">
+            Lisan al Dawat & Arabic Keyboard
           </h3>
-          <span className="text-[10px] bg-emerald-900/80 text-emerald-300 font-semibold px-2 py-0.5 rounded border border-emerald-700/50">
+          <span className="text-[9px] sm:text-[10px] bg-emerald-900/80 text-emerald-300 font-semibold px-1.5 py-0.5 rounded border border-emerald-700/50">
             لسان الدعوة
           </span>
         </div>
@@ -118,13 +118,13 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       </div>
 
       {/* Quick Calligraphy Phrases */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-2.5 mb-2 text-xs border-b border-slate-700/60">
-        <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">Quick Calligraphy:</span>
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 text-xs border-b border-slate-700/60 no-scrollbar">
+        <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium whitespace-nowrap">Phrases:</span>
         {quickPhrases.map((phrase, idx) => (
           <button
             key={idx}
             onClick={() => onInsertChar(phrase.text + ' ')}
-            className="px-2.5 py-1 bg-slate-800 hover:bg-emerald-800 text-emerald-200 hover:text-white rounded border border-slate-700 font-serif text-sm transition-all whitespace-nowrap shadow-xs"
+            className="px-2 py-0.5 bg-slate-800 hover:bg-emerald-800 text-emerald-200 hover:text-white rounded border border-slate-700 font-serif text-xs sm:text-sm transition-all whitespace-nowrap shadow-xs"
           >
             {phrase.label}
           </button>
@@ -132,15 +132,15 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       </div>
 
       {/* Virtual Keyboard Keys */}
-      <div className="space-y-1.5 dir-rtl" dir="rtl">
+      <div className="space-y-1.5 dir-rtl overflow-x-auto pb-1" dir="rtl">
         {rows.map((row, rIdx) => (
-          <div key={rIdx} className="flex justify-center gap-1">
+          <div key={rIdx} className="flex justify-center gap-1 min-w-max">
             {row.map((item, kIdx) => (
               <button
                 key={kIdx}
                 onClick={() => onInsertChar(item.char)}
                 title={item.name}
-                className={`min-w-[34px] h-9 px-1 rounded flex items-center justify-center font-bold font-serif text-base transition-all active:scale-95 shadow-xs ${
+                className={`min-w-[28px] sm:min-w-[34px] h-8 sm:h-9 px-1 rounded flex items-center justify-center font-bold font-serif text-sm sm:text-base transition-all active:scale-95 shadow-xs ${
                   item.char === 'پ' || item.char === 'چ' || item.char === 'ژ' || item.char === 'گ'
                     ? 'bg-amber-700/90 hover:bg-amber-600 text-amber-100 border border-amber-500' // Highlight Lisan al Dawat letters
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 hover:border-slate-500'
@@ -154,13 +154,13 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       </div>
 
       {/* Spacebar & Actions */}
-      <div className="flex items-center justify-between mt-3 pt-2 border-t border-slate-700 text-xs">
-        <span className="text-[11px] text-slate-400">
-          Tip: Orange keys (<span className="text-amber-300 font-bold">پ, چ, ژ, گ</span>) are unique Lisan al Dawat letters.
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700 text-xs">
+        <span className="text-[10px] sm:text-[11px] text-slate-400">
+          Orange (<span className="text-amber-300 font-bold">پ, چ, ژ, گ</span>) = Lisan al Dawat
         </span>
         <button
           onClick={() => onInsertChar(' ')}
-          className="px-8 py-1.5 bg-slate-700 hover:bg-slate-600 font-semibold rounded text-slate-200 shadow-sm transition-colors"
+          className="px-6 sm:px-8 py-1 bg-slate-700 hover:bg-slate-600 font-semibold rounded text-slate-200 shadow-sm transition-colors text-xs"
         >
           Spacebar
         </button>

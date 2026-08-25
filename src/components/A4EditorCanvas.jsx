@@ -76,8 +76,8 @@ export default function A4EditorCanvas({
   return (
     <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 no-print select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
       
-      {/* Top Horizontal Ruler */}
-      <div className="w-[794px] h-6 bg-white border border-gray-300 mb-2 flex items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm" dir={textDirection}>
+      {/* Top Horizontal Ruler (Hidden on small mobile) */}
+      <div className="hidden sm:flex max-w-[794px] w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm" dir={textDirection}>
         <span>٠</span>
         <span>١</span>
         <span>٢</span>
@@ -91,7 +91,7 @@ export default function A4EditorCanvas({
 
       {/* A4 Paper Container with Zoom Scaling */}
       <div 
-        className="transition-transform origin-top duration-150 ease-out"
+        className="w-full max-w-[794px] transition-transform origin-top duration-150 ease-out flex justify-center"
         style={{ transform: `scale(${zoomLevel / 100})` }}
       >
         <div 
