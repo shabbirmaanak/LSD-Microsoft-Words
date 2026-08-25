@@ -2,7 +2,7 @@
 // Bundled fonts stored directly inside public/fonts/
 
 export const preinstalledFonts = [
-  // User's Lisan al Dawat Custom TTF Fonts
+  // Lisan al Dawat Fonts
   {
     name: 'Al-Fatemi (لسان الدعوة)',
     value: 'Al-Fatemi, Amiri, serif',
@@ -33,40 +33,14 @@ export const preinstalledFonts = [
     category: 'Lisan al Dawat',
     isPreinstalled: true,
   },
-
-  // Arabic & Web Fonts
   {
     name: 'Amiri',
     value: 'Amiri, serif',
     category: 'Lisan al Dawat & Arabic',
     isPreinstalled: true,
   },
-  {
-    name: 'Scheherazade New (نسخ)',
-    value: 'Scheherazade New, serif',
-    category: 'Lisan al Dawat & Arabic',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Noto Naskh Arabic',
-    value: 'Noto Naskh Arabic, serif',
-    category: 'Lisan al Dawat & Arabic',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Cairo',
-    value: 'Cairo, sans-serif',
-    category: 'Arabic Modern',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Gulzar (نستعليق)',
-    value: 'Gulzar, cursive',
-    category: 'Nastaliq',
-    isPreinstalled: true,
-  },
 
-  // Standard Typography
+  // Standard Office Typography
   {
     name: 'Calibri',
     value: 'Calibri, sans-serif',
