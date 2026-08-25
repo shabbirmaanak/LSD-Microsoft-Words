@@ -66,7 +66,50 @@ export default function A4EditorCanvas({
     },
     editorProps: {
       handleKeyDown: (view, event) => {
-        // Physical Keyboard Alkanz & Amiri Lisan al Dawat Shortcuts
+        const { $from } = view.state.selection;
+        const charBefore = $from.nodeBefore?.text ? $from.nodeBefore.text.slice(-1) : '';
+
+        // Double-key replacements (e.g. سس => ے, ss => ے, ee => پ, ;; => گ, pp => چ)
+        if (!event.ctrlKey && !event.metaKey && !event.altKey) {
+          // س + س OR s + s => ے (Bari Ye)
+          if ((event.key === 'س' && charBefore === 'س') || (event.key === 's' && charBefore === 's')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ے');
+            view.dispatch(tr);
+            return true;
+          }
+          // e + e OR پ + پ => پ (Pe)
+          if ((event.key === 'e' && charBefore === 'e') || (event.key === 'پ' && charBefore === 'پ')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('پ');
+            view.dispatch(tr);
+            return true;
+          }
+          // ; + ; OR ك + ك => گ (Gaf)
+          if ((event.key === ';' && charBefore === ';') || (event.key === 'ك' && charBefore === 'ك')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('گ');
+            view.dispatch(tr);
+            return true;
+          }
+          // p + p OR چ + چ => چ (Che)
+          if ((event.key === 'p' && charBefore === 'p') || (event.key === 'چ' && charBefore === 'چ')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('چ');
+            view.dispatch(tr);
+            return true;
+          }
+          // q + q OR ط + ط => ٹ (Tte)
+          if ((event.key === 'q' && charBefore === 'q') || (event.key === 'ط' && charBefore === 'ط')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ٹ');
+            view.dispatch(tr);
+            return true;
+          }
+          // ح + ح => ھ (Do-chashmi He)
+          if (event.key === 'ح' && charBefore === 'ح') {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ھ');
+            view.dispatch(tr);
+            return true;
+          }
+        }
+
+        // Single Shift Shortcuts (Shift + P -> چ, Shift + K -> گ, Shift + Z -> ژ, etc)
         if (event.shiftKey && !event.ctrlKey && !event.metaKey) {
           if (event.key === 'P') { // Shift + P -> چ
             view.dispatch(view.state.tr.insertText('چ'));
