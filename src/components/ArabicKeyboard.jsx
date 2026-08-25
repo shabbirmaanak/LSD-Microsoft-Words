@@ -1,10 +1,27 @@
 import React from 'react';
-import { X, Keyboard } from 'lucide-react';
+import { X, Keyboard, Sparkles } from 'lucide-react';
 
 export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
   if (!isOpen) return null;
 
-  // Lisan al Dawat & Arabic Letters layout
+  // Lisan al Dawat Special Bar (Alkanz & Amiri Layouts)
+  const lisanDawatSpecialKeys = [
+    { char: 'چ', name: 'Che (Alkanz/Amiri: pp / P)' },
+    { char: 'گ', name: 'Gaf (Alkanz/Amiri: ;; / K)' },
+    { char: 'پ', name: 'Pe (Alkanz/Amiri: ee / u)' },
+    { char: 'ے', name: 'Bari Ye (Alkanz/Amiri: ss / y)' },
+    { char: 'ھ', name: 'Do-chashmi He (h)' },
+    { char: 'چهے', name: 'Chhe (Alkanz: Shift+P / ‘)' },
+    { char: 'ٹ', name: 'Tte (qq / t)' },
+    { char: 'ں', name: 'Noon Ghunna (ww / N)' },
+    { char: 'ژ', name: 'Zhe (Z)' },
+    { char: 'ۓ', name: 'Hamza Bari Ye (C)' },
+    { char: 'أل', name: 'Alif-Lam (Alkanz)' },
+    { char: 'إل', name: 'Alif-Kasra-Lam (Alkanz)' },
+    { char: 'لا', name: 'Lam-Alif (b)' },
+  ];
+
+  // Full Alkanz & Amiri Keyboard Layout rows
   const rows = [
     // Diacritics row
     [
@@ -23,7 +40,7 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       { char: 'إ', name: 'Alif Kasra' },
       { char: 'آ', name: 'Alif Madda' },
     ],
-    // Top letter row
+    // Top letter row (q w e r t y u i o p [ ])
     [
       { char: 'ض', name: 'Dad' },
       { char: 'ص', name: 'Sad' },
@@ -40,7 +57,7 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       { char: 'د', name: 'Dal' },
       { char: 'ذ', name: 'Thal' },
     ],
-    // Home row
+    // Home row (a s d f g h j k l ; ')
     [
       { char: 'ش', name: 'Sheen' },
       { char: 'س', name: 'Seen' },
@@ -57,7 +74,7 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       { char: 'ط', name: 'Taa' },
       { char: 'ظ', name: 'Zaa' },
     ],
-    // Bottom row
+    // Bottom row (z x c v b n m , . /)
     [
       { char: 'ئ', name: 'Ya Hamza' },
       { char: 'ء', name: 'Hamza' },
@@ -68,10 +85,13 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       { char: 'و', name: 'Waw' },
       { char: 'ة', name: 'Ta Marbuta' },
       { char: 'ى', name: 'Alif Maqsura' },
+      { char: 'ے', name: 'Bari Ye (Lisan Dawat)' },
+      { char: 'ھ', name: 'Do-chashmi He' },
+      { char: 'چهے', name: 'Chhe' },
       { char: 'ﷲ', name: 'Allah' },
       { char: 'ﷺ', name: 'Sallallahu Alaihi Wa Sallam' },
     ],
-    // Arabic Numerals row
+    // Numerals
     [
       { char: '٠', name: '0' },
       { char: '١', name: '1' },
@@ -96,16 +116,16 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
   ];
 
   return (
-    <div className="fixed bottom-0 sm:bottom-12 left-0 sm:left-1/2 sm:-translate-x-1/2 z-50 bg-[#1e293b] text-white rounded-t-xl sm:rounded-xl shadow-2xl p-3 sm:p-4 border border-slate-700 w-full sm:max-w-3xl max-h-[85vh] overflow-y-auto select-none arabic-keyboard-modal animate-in fade-in slide-in-from-bottom-5 duration-150">
+    <div className="fixed bottom-0 sm:bottom-12 left-0 sm:left-1/2 sm:-translate-x-1/2 z-50 bg-[#1e293b] text-white rounded-t-xl sm:rounded-xl shadow-2xl p-3 sm:p-4 border border-slate-700 w-full sm:max-w-4xl max-h-[88vh] overflow-y-auto select-none arabic-keyboard-modal animate-in fade-in slide-in-from-bottom-5 duration-150">
       
       {/* Header */}
       <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-700">
         <div className="flex items-center gap-2">
           <Keyboard className="w-4 h-4 sm:w-5 sm:h-5 text-[#046a38] bg-emerald-100 p-0.5 rounded" />
           <h3 className="font-bold text-xs sm:text-sm text-slate-100 font-serif">
-            Lisan al Dawat & Arabic Keyboard
+            Lisan al Dawat & Alkanz Layout Keyboard
           </h3>
-          <span className="text-[9px] sm:text-[10px] bg-emerald-900/80 text-emerald-300 font-semibold px-1.5 py-0.5 rounded border border-emerald-700/50">
+          <span className="text-[9px] sm:text-[10px] bg-emerald-900/80 text-emerald-300 font-semibold px-2 py-0.5 rounded border border-emerald-700/50">
             لسان الدعوة
           </span>
         </div>
@@ -117,9 +137,29 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
         </button>
       </div>
 
+      {/* Dedicated Lisan al Dawat Special Characters Bar */}
+      <div className="bg-amber-950/70 border border-amber-600/60 rounded-lg p-2 mb-3">
+        <div className="flex items-center gap-1 mb-1.5 text-amber-200 text-[11px] font-bold">
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <span>Lisan al Dawat Unique Characters (حروف لسان الدعوة):</span>
+        </div>
+        <div className="flex flex-wrap gap-1.5 dir-rtl" dir="rtl">
+          {lisanDawatSpecialKeys.map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => onInsertChar(item.char)}
+              title={item.name}
+              className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-md font-bold font-serif text-base shadow-sm transition-all active:scale-95 border border-amber-400 flex items-center gap-1"
+            >
+              <span>{item.char}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Quick Calligraphy Phrases */}
       <div className="flex items-center gap-1.5 overflow-x-auto pb-2 mb-2 text-xs border-b border-slate-700/60 no-scrollbar">
-        <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium whitespace-nowrap">Phrases:</span>
+        <span className="text-[10px] sm:text-[11px] text-slate-400 font-medium whitespace-nowrap">Calligraphy:</span>
         {quickPhrases.map((phrase, idx) => (
           <button
             key={idx}
@@ -141,8 +181,8 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
                 onClick={() => onInsertChar(item.char)}
                 title={item.name}
                 className={`min-w-[28px] sm:min-w-[34px] h-8 sm:h-9 px-1 rounded flex items-center justify-center font-bold font-serif text-sm sm:text-base transition-all active:scale-95 shadow-xs ${
-                  item.char === 'پ' || item.char === 'چ' || item.char === 'ژ' || item.char === 'گ'
-                    ? 'bg-amber-700/90 hover:bg-amber-600 text-amber-100 border border-amber-500' // Highlight Lisan al Dawat letters
+                  item.char === 'پ' || item.char === 'چ' || item.char === 'ژ' || item.char === 'گ' || item.char === 'ے' || item.char === 'ھ' || item.char === 'چهے'
+                    ? 'bg-amber-600 hover:bg-amber-500 text-white font-black border border-amber-300' // Highlight Lisan al Dawat letters
                     : 'bg-slate-800 hover:bg-slate-700 text-slate-100 border border-slate-700 hover:border-slate-500'
                 }`}
               >
@@ -155,8 +195,8 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
 
       {/* Spacebar & Actions */}
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700 text-xs">
-        <span className="text-[10px] sm:text-[11px] text-slate-400">
-          Orange (<span className="text-amber-300 font-bold">پ, چ, ژ, گ</span>) = Lisan al Dawat
+        <span className="text-[10px] sm:text-[11px] text-slate-300 font-serif">
+          Alkanz/Amiri Mappings: <span className="text-amber-300 font-bold">pp=چ, ;;=گ, ee=پ, ss=ے, h=ھ, ‘=چهے</span>
         </span>
         <button
           onClick={() => onInsertChar(' ')}

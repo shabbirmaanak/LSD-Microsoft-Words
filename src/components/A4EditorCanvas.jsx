@@ -64,6 +64,34 @@ export default function A4EditorCanvas({
     onUpdate: ({ editor }) => {
       onContentChange(editor.getHTML(), editor.getText());
     },
+    editorProps: {
+      handleKeyDown: (view, event) => {
+        // Physical Keyboard Alkanz & Amiri Lisan al Dawat Shortcuts
+        if (event.shiftKey && !event.ctrlKey && !event.metaKey) {
+          if (event.key === 'P') { // Shift + P -> چ
+            view.dispatch(view.state.tr.insertText('چ'));
+            return true;
+          }
+          if (event.key === 'K') { // Shift + K -> گ
+            view.dispatch(view.state.tr.insertText('گ'));
+            return true;
+          }
+          if (event.key === 'Z') { // Shift + Z -> ژ
+            view.dispatch(view.state.tr.insertText('ژ'));
+            return true;
+          }
+          if (event.key === 'N') { // Shift + N -> ں
+            view.dispatch(view.state.tr.insertText('ں'));
+            return true;
+          }
+          if (event.key === 'C') { // Shift + C -> ۓ
+            view.dispatch(view.state.tr.insertText('ۓ'));
+            return true;
+          }
+        }
+        return false;
+      },
+    },
   });
 
   // Share editor instance with parent app & ribbon
