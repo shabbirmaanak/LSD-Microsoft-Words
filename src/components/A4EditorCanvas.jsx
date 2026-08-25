@@ -186,18 +186,21 @@ export default function A4EditorCanvas({
               className="bg-gray-900 text-white rounded-lg shadow-xl px-2 py-1 flex items-center gap-1 border border-gray-700 text-xs z-50"
             >
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => editor.chain().focus().toggleBold().run()}
                 className={`p-1 hover:bg-gray-800 rounded ${editor.isActive('bold') ? 'text-[#046a38] font-bold' : 'text-gray-300'}`}
               >
                 <Bold className="w-3.5 h-3.5" />
               </button>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => editor.chain().focus().toggleItalic().run()}
                 className={`p-1 hover:bg-gray-800 rounded ${editor.isActive('italic') ? 'text-[#046a38]' : 'text-gray-300'}`}
               >
                 <Italic className="w-3.5 h-3.5" />
               </button>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => editor.chain().focus().toggleUnderline().run()}
                 className={`p-1 hover:bg-gray-800 rounded ${editor.isActive('underline') ? 'text-[#046a38]' : 'text-gray-300'}`}
               >
@@ -205,18 +208,21 @@ export default function A4EditorCanvas({
               </button>
               <div className="w-[1px] h-3 bg-gray-700 mx-1"></div>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => editor.chain().focus().setTextAlign('right').run()}
                 className="p-1 hover:bg-gray-800 rounded text-gray-300"
               >
                 <AlignRight className="w-3.5 h-3.5" />
               </button>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => editor.chain().focus().setTextAlign('center').run()}
                 className="p-1 hover:bg-gray-800 rounded text-gray-300"
               >
                 <AlignCenter className="w-3.5 h-3.5" />
               </button>
               <button
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => editor.chain().focus().setTextAlign('left').run()}
                 className="p-1 hover:bg-gray-800 rounded text-gray-300"
               >
