@@ -2,9 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Local Bundled Font Faces */
+@font-face {
+  font-family: 'Al-Fatemi';
+  src: url('/fonts/Al-Fatemi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Al-Kanz';
+  src: url('/fonts/Al-Kanz.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Kanz-al-Lulu';
+  src: url('/fonts/Kanz-al-Lulu.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Kanz-al-Marjaan';
+  src: url('/fonts/Kanz-al-Marjaan.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+@font-face {
+  font-family: 'Kanz-al-Yaqoot';
+  src: url('/fonts/Kanz-al-Yaqoot.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 @layer base {
   body {
-    font-family: 'Amiri', 'Noto Naskh Arabic', 'Segoe UI', Calibri, Arial, sans-serif;
+    font-family: 'Al-Fatemi', 'Al-Kanz', 'Amiri', 'Noto Naskh Arabic', 'Segoe UI', Calibri, Arial, sans-serif;
     color: #323130;
   }
 }
@@ -47,12 +79,12 @@
 
 /* Calligraphy Headers */
 .bismillah-header {
-  font-family: 'Amiri', 'Scheherazade New', serif;
+  font-family: 'Al-Fatemi', 'Al-Kanz', 'Amiri', 'Scheherazade New', serif;
   font-size: 1.85rem;
   font-weight: 700;
   text-align: center;
   margin-bottom: 1.25rem;
-  color: #046a38; /* Deep Islamic Green */
+  color: #046a38;
   line-height: 1.8;
 }
 
@@ -60,8 +92,8 @@
 .ProseMirror {
   outline: none !important;
   min-height: 900px;
-  font-size: 1.2rem; /* Comfortable size for Arabic diacritics */
-  line-height: 1.85; /* Extra line-height for Arabic vowels */
+  font-size: 1.2rem;
+  line-height: 1.85;
 }
 
 .ProseMirror p {

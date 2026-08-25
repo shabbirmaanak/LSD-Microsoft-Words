@@ -1,10 +1,42 @@
 // Pre-installed Default Fonts Configuration for LSD-Microsoft Word Studio
-// Put your custom .ttf / .otf / .woff files into public/fonts/ folder and list them below!
+// Bundled fonts stored directly inside public/fonts/
 
 export const preinstalledFonts = [
-  // Lisan al Dawat & Arabic Pre-installed Fonts
+  // User's Lisan al Dawat Custom TTF Fonts
   {
-    name: 'Amiri (عربي / لسان الدعوة)',
+    name: 'Al-Fatemi (لسان الدعوة)',
+    value: 'Al-Fatemi, Amiri, serif',
+    category: 'Lisan al Dawat',
+    isPreinstalled: true,
+  },
+  {
+    name: 'Al-Kanz (لسان الدعوة)',
+    value: 'Al-Kanz, Amiri, serif',
+    category: 'Lisan al Dawat',
+    isPreinstalled: true,
+  },
+  {
+    name: 'Kanz-al-Lulu',
+    value: 'Kanz-al-Lulu, Amiri, serif',
+    category: 'Lisan al Dawat',
+    isPreinstalled: true,
+  },
+  {
+    name: 'Kanz-al-Marjaan',
+    value: 'Kanz-al-Marjaan, Amiri, serif',
+    category: 'Lisan al Dawat',
+    isPreinstalled: true,
+  },
+  {
+    name: 'Kanz-al-Yaqoot',
+    value: 'Kanz-al-Yaqoot, Amiri, serif',
+    category: 'Lisan al Dawat',
+    isPreinstalled: true,
+  },
+
+  // Arabic & Web Fonts
+  {
+    name: 'Amiri',
     value: 'Amiri, serif',
     category: 'Lisan al Dawat & Arabic',
     isPreinstalled: true,
@@ -22,7 +54,7 @@ export const preinstalledFonts = [
     isPreinstalled: true,
   },
   {
-    name: 'Cairo (عصري)',
+    name: 'Cairo',
     value: 'Cairo, sans-serif',
     category: 'Arabic Modern',
     isPreinstalled: true,
@@ -31,12 +63,6 @@ export const preinstalledFonts = [
     name: 'Gulzar (نستعليق)',
     value: 'Gulzar, cursive',
     category: 'Nastaliq',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Lateef (خفيف)',
-    value: 'Lateef, cursive',
-    category: 'Arabic Calligraphy',
     isPreinstalled: true,
   },
 
@@ -64,35 +90,26 @@ export const preinstalledFonts = [
     value: 'Times New Roman, serif',
     category: 'Standard Office',
     isPreinstalled: true,
-  },
-  {
-    name: 'Georgia',
-    value: 'Georgia, serif',
-    category: 'Standard Office',
-    isPreinstalled: true,
   }
 ];
 
-// Helper to register local font files stored in public/fonts/
 export const loadLocalFontsFolder = async () => {
-  // If user places font files in public/fonts/ font Manifest can register them
-  try {
-    const res = await fetch('/fonts/manifest.json');
-    if (res.ok) {
-      const manifest = await res.json();
-      for (const font of manifest) {
-        const fontFace = new FontFace(font.name, `url(/fonts/${font.file})`);
-        const loaded = await fontFace.load();
-        document.fonts.add(loaded);
-        preinstalledFonts.unshift({
-          name: `✨ ${font.name} (Local)`,
-          value: `${font.name}, sans-serif`,
-          category: 'Custom Local',
-          isPreinstalled: true
-        });
-      }
+  const localTTFFiles = [
+    { name: 'Al-Fatemi', file: '/fonts/Al-Fatemi.ttf' },
+    { name: 'Al-Kanz', file: '/fonts/Al-Kanz.ttf' },
+    { name: 'Amiri-Regular', file: '/fonts/Amiri-Regular.ttf' },
+    { name: 'Kanz-al-Lulu', file: '/fonts/Kanz-al-Lulu.ttf' },
+    { name: 'Kanz-al-Marjaan', file: '/fonts/Kanz-al-Marjaan.ttf' },
+    { name: 'Kanz-al-Yaqoot', file: '/fonts/Kanz-al-Yaqoot.ttf' }
+  ];
+
+  for (const item of localTTFFiles) {
+    try {
+      const fontFace = new FontFace(item.name, `url(${item.file})`);
+      const loaded = await fontFace.load();
+      document.fonts.add(loaded);
+    } catch (e) {
+      console.warn('Could not load font file:', item.name, e);
     }
-  } catch (e) {
-    // Manifest not present, default preinstalled fonts load seamlessly
   }
 };
