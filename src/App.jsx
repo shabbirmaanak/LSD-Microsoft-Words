@@ -15,10 +15,8 @@ import { preinstalledFonts } from './config/defaultFonts';
 export default function App() {
   // Document State
   const [docId, setDocId] = useState('doc_' + Date.now());
-  const [docTitle, setDocTitle] = useState('Formal Business Proposal Letter.docx');
-  const [content, setContent] = useState(
-    letterTemplates.find(t => t.id === 'formal-business')?.content || letterTemplates[0]?.content || '<p>Dear Recipient,</p><p>Welcome to Word Online.</p>'
-  );
+  const [docTitle, setDocTitle] = useState('Document1.docx');
+  const [content, setContent] = useState('<p></p>');
   const [editorText, setEditorText] = useState('');
   const [editorInstance, setEditorInstance] = useState(null);
 
@@ -233,8 +231,8 @@ export default function App() {
   const handleNewLetter = () => {
     const newId = 'doc_' + Date.now();
     setDocId(newId);
-    setDocTitle('Untitled Letter.docx');
-    setContent('<p>Dear Recipient,</p><br><p>[Type your letter body here...]</p><br><p>Sincerely,</p><br><p><strong>[Your Name]</strong></p>');
+    setDocTitle('Document1.docx');
+    setContent('<p></p>');
     setWatermark('');
     setTextDirection('ltr');
   };
