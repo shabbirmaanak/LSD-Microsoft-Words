@@ -110,7 +110,28 @@
   line-height: 1.8;
 }
 
-/* Tiptap Editor & Lisan al Dawat Font Ligatures */
+/* Tiptap Editor Root Container */
+.ProseMirror {
+  outline: none !important;
+  min-height: 900px;
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .ProseMirror {
+    min-height: 500px !important;
+    font-size: 1.05rem !important;
+    line-height: 1.6 !important;
+  }
+}
+
+.ProseMirror p {
+  margin-bottom: 0.5rem;
+  min-height: auto !important;
+}
+
+/* Enable OpenType Font Ligatures for Lisan al Dawat */
 .lisan-dawat-text,
 .ProseMirror,
 .ProseMirror p,
@@ -119,16 +140,7 @@
   font-feature-settings: "liga" 1, "dlig" 1, "calt" 1, "rlig" 1, "clig" 1;
   font-variant-ligatures: normal discretionary-ligatures contextual;
   text-rendering: optimizeLegibility;
-  font-variant: normal;
   letter-spacing: 0px;
-  outline: none !important;
-  min-height: 900px;
-  font-size: 1.2rem;
-  line-height: 1.85;
-}
-
-.ProseMirror p {
-  margin-bottom: 0.85rem;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {
