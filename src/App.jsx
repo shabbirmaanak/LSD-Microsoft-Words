@@ -72,7 +72,9 @@ export default function App() {
       if (storedActiveFonts) {
         const parsed = JSON.parse(storedActiveFonts);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          setActiveFontValues(parsed);
+          const validValues = preinstalledFonts.map((f) => f.value);
+          const filtered = parsed.filter((v) => validValues.includes(v) || v.includes('Custom'));
+          setActiveFontValues(filtered.length > 0 ? filtered : validValues);
         }
       }
     } catch (e) {

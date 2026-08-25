@@ -38,8 +38,9 @@ export default function Ribbon({
 
   if (!editor) return null;
 
-  // Filter fonts to only show active ones
-  const visibleFonts = allAvailableFonts.filter((f) => activeFontValues.includes(f.value));
+  // Filter fonts to only show active ones, fallback to allAvailableFonts if empty
+  const filteredFonts = allAvailableFonts.filter((f) => activeFontValues.includes(f.value));
+  const visibleFonts = filteredFonts.length > 0 ? filteredFonts : allAvailableFonts;
 
   const fontSizes = ['10pt', '11pt', '12pt', '14pt', '16pt', '18pt', '22pt', '26pt', '32pt', '40pt'];
 
