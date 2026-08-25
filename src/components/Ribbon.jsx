@@ -5,7 +5,8 @@ import {
   List, ListOrdered, Indent, Outdent,
   Highlighter, Palette, RotateCcw, RotateCw,
   Table, Calendar, User, FileText, Stamp,
-  Printer, Download, Plus, Layout, Type, Sparkles, Keyboard, Upload, Settings
+  Printer, Download, Plus, Layout, Type, Sparkles, Keyboard, Upload, Settings,
+  AArrowUp, AArrowDown, Eraser, CaseUpper
 } from 'lucide-react';
 
 export default function Ribbon({
@@ -94,7 +95,7 @@ export default function Ribbon({
               </button>
             </div>
 
-            {/* Font Family Selector (Displays ONLY selected active fonts) */}
+            {/* Font Family & Size Selector */}
             <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
               <select
                 onChange={(e) => {
@@ -120,7 +121,7 @@ export default function Ribbon({
               <select
                 onChange={(e) => editor.chain().focus().setFontSize?.(e.target.value).run()}
                 className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600"
-                defaultValue="11pt"
+                defaultValue="12pt"
               >
                 {fontSizes.map((s) => (
                   <option key={s} value={s}>{s}</option>
@@ -128,7 +129,7 @@ export default function Ribbon({
               </select>
             </div>
 
-            {/* Font Styles */}
+            {/* Font Formatting: B I U S Sub Sup */}
             <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
               <button
                 onClick={() => editor.chain().focus().toggleBold().run()}
@@ -169,9 +170,29 @@ export default function Ribbon({
               >
                 <Strikethrough className="w-4 h-4" />
               </button>
+
+              <button
+                onClick={() => editor.chain().focus().toggleSubscript().run()}
+                className={`p-1.5 rounded transition-colors ${
+                  editor.isActive('subscript') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
+                }`}
+                title="Subscript"
+              >
+                <Subscript className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => editor.chain().focus().toggleSuperscript().run()}
+                className={`p-1.5 rounded transition-colors ${
+                  editor.isActive('superscript') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
+                }`}
+                title="Superscript"
+              >
+                <Superscript className="w-4 h-4" />
+              </button>
             </div>
 
-            {/* Colors */}
+            {/* Color Palette */}
             <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
               <button
                 onClick={() => setShowColorPicker(!showColorPicker)}
@@ -221,10 +242,17 @@ export default function Ribbon({
               >
                 <AlignRight className="w-4 h-4" />
               </button>
+              <button
+                onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+                className={`p-1.5 rounded ${editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
+                title="Justify"
+              >
+                <AlignJustify className="w-4 h-4" />
+              </button>
             </div>
 
             {/* Lists */}
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
               <button
                 onClick={() => editor.chain().focus().toggleBulletList().run()}
                 className={`p-1.5 rounded ${editor.isActive('bulletList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
@@ -240,6 +268,55 @@ export default function Ribbon({
                 <ListOrdered className="w-4 h-4" />
               </button>
             </div>
+
+            {/* ============================================================== */}
+            {/* EXACT MICROSOFT WORD PARAGRAPH DIRECTION TOOLS: >¶ (LTR) & ¶< (RTL) */}
+            {/* ============================================================== */}
+            <div className="flex items-center gap-1 bg-gray-200/80 p-1 rounded-md border border-gray-300">
+              
+              {/* >¶ Left-to-Right Text Direction Button */}
+              <button
+                onClick={() => {
+                  setTextDirection('ltr');
+                  editor.chain().focus().setTextAlign('left').run();
+                }}
+                className={`flex items-center justify-center px-2 py-1 rounded text-xs font-bold transition-all shadow-2xs ${
+                  textDirection === 'ltr'
+                    ? 'bg-[#106ebe] text-white ring-1 ring-blue-700 shadow-sm'
+                    : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-300'
+                }`}
+                title="Left-to-Right Text Direction (>¶)"
+              >
+                <span className="font-mono text-sm tracking-tighter">›¶</span>
+              </button>
+
+              {/* ¶< Right-to-Left Text Direction Button (for Lisan al Dawat & Arabic) */}
+              <button
+                onClick={() => {
+                  setTextDirection('rtl');
+                  editor.chain().focus().setTextAlign('right').run();
+                }}
+                className={`flex items-center justify-center px-2 py-1 rounded text-xs font-bold transition-all shadow-2xs ${
+                  textDirection === 'rtl'
+                    ? 'bg-[#046a38] text-white ring-1 ring-emerald-700 shadow-sm'
+                    : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-300'
+                }`}
+                title="Right-to-Left Text Direction (¶< - Lisan al Dawat / Arabic)"
+              >
+                <span className="font-mono text-sm tracking-tighter">¶‹</span>
+              </button>
+
+            </div>
+
+            {/* Arabic On-screen Keyboard Toggle */}
+            <button
+              onClick={onToggleArabicKeyboard}
+              className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs transition-colors"
+              title="Open On-Screen Arabic & Lisan al Dawat Virtual Keyboard"
+            >
+              <Keyboard className="w-3.5 h-3.5 text-emerald-200" />
+              <span>Keyboard</span>
+            </button>
           </div>
         )}
 
@@ -299,29 +376,6 @@ export default function Ribbon({
         {/* ==================== LAYOUT TAB ==================== */}
         {activeTab === 'layout' && (
           <div className="flex items-center gap-4">
-            {/* Text Direction */}
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-gray-700">Text Direction:</span>
-              <div className="flex bg-white border border-gray-300 rounded p-0.5 shadow-sm font-semibold">
-                <button
-                  onClick={() => setTextDirection('ltr')}
-                  className={`px-3 py-1 rounded capitalize ${
-                    textDirection === 'ltr' ? 'bg-[#106ebe] text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  LTR (English)
-                </button>
-                <button
-                  onClick={() => setTextDirection('rtl')}
-                  className={`px-3 py-1 rounded capitalize ${
-                    textDirection === 'rtl' ? 'bg-[#046a38] text-white font-bold' : 'hover:bg-gray-100 text-gray-700'
-                  }`}
-                >
-                  RTL (Lisan al Dawat / Arabic)
-                </button>
-              </div>
-            </div>
-
             {/* Margins */}
             <div className="flex items-center gap-2">
               <span className="font-medium text-gray-600">Margins:</span>
@@ -337,6 +391,29 @@ export default function Ribbon({
                     {m}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Orientation */}
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-gray-600">Orientation:</span>
+              <div className="flex bg-white border border-gray-300 rounded p-0.5 shadow-sm">
+                <button
+                  onClick={() => setOrientation('portrait')}
+                  className={`px-2.5 py-1 rounded capitalize font-medium ${
+                    orientation === 'portrait' ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  Portrait
+                </button>
+                <button
+                  onClick={() => setOrientation('landscape')}
+                  className={`px-2.5 py-1 rounded capitalize font-medium ${
+                    orientation === 'landscape' ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  Landscape
+                </button>
               </div>
             </div>
           </div>
