@@ -68,7 +68,7 @@ export default function HeaderBar({
             </span>
           </div>
           <span className="text-[10px] sm:text-[11px] text-blue-100 font-normal pl-1 truncate hidden sm:block">
-            Microsoft Word Online — Letter Edition
+            al-kitābah — الكتابة
           </span>
         </div>
       </div>
