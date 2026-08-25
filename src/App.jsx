@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import html2pdf from 'html2pdf.js';
 import HeaderBar from './components/HeaderBar';
 import Ribbon from './components/Ribbon';
 import A4EditorCanvas from './components/A4EditorCanvas';
@@ -11,13 +10,15 @@ import ArabicKeyboard from './components/ArabicKeyboard';
 import FontUploadModal from './components/FontUploadModal';
 import FontManagerModal from './components/FontManagerModal';
 import { letterTemplates } from './data/letterTemplates';
-import { preinstalledFonts, loadLocalFontsFolder } from './config/defaultFonts';
+import { preinstalledFonts } from './config/defaultFonts';
 
 export default function App() {
   // Document State
   const [docId, setDocId] = useState('doc_' + Date.now());
   const [docTitle, setDocTitle] = useState('Formal Business Proposal Letter.docx');
-  const [content, setContent] = useState(letterTemplates.find(t => t.id === 'formal-business')?.content || letterTemplates[0].content);
+  const [content, setContent] = useState(
+    letterTemplates.find(t => t.id === 'formal-business')?.content || letterTemplates[0]?.content || '<p>Dear Recipient,</p><p>Welcome to Word Online.</p>'
+  );
   const [editorText, setEditorText] = useState('');
   const [editorInstance, setEditorInstance] = useState(null);
 
@@ -53,20 +54,17 @@ export default function App() {
     ...preinstalledFonts
   ];
 
-  // Load Custom Uploaded Fonts, Active Fonts List & Saved Letters on Mount
+  // Load Custom Uploaded Fonts & Saved Letters safely on Mount
   useEffect(() => {
-    // 1. Load Preinstalled Local Fonts
-    loadLocalFontsFolder();
-
-    // 2. Load Saved Letters
+    // 1. Load Saved Letters
     try {
       const stored = localStorage.getItem('word_letters_studio_saved');
       if (stored) setSavedLetters(JSON.parse(stored));
     } catch (e) {
-      console.error('Failed to load saved letters', e);
+      console.warn('Failed to load saved letters', e);
     }
 
-    // 3. Load Active Font List Preference
+    // 2. Load Active Font List Preference
     try {
       const storedActiveFonts = localStorage.getItem('word_letters_active_fonts');
       if (storedActiveFonts) {
@@ -74,14 +72,14 @@ export default function App() {
         if (Array.isArray(parsed) && parsed.length > 0) {
           const validValues = preinstalledFonts.map((f) => f.value);
           const filtered = parsed.filter((v) => validValues.includes(v) || v.includes('Custom'));
-          setActiveFontValues(filtered.length > 0 ? filtered : validValues);
+          if (filtered.length > 0) setActiveFontValues(filtered);
         }
       }
     } catch (e) {
-      console.error('Failed to load active font list', e);
+      console.warn('Failed to load active font list', e);
     }
 
-    // 4. Load & Re-Register Custom Fonts
+    // 3. Load & Re-Register Custom Uploaded Fonts
     try {
       const storedFonts = localStorage.getItem('word_letters_custom_fonts');
       if (storedFonts) {
@@ -90,18 +88,20 @@ export default function App() {
         
         fontsArray.forEach(async (fontObj) => {
           try {
-            const res = await fetch(fontObj.base64Data);
-            const arrayBuffer = await res.arrayBuffer();
-            const fontFace = new FontFace(fontObj.name, arrayBuffer);
-            const loadedFace = await fontFace.load();
-            document.fonts.add(loadedFace);
+            if (fontObj.name && fontObj.base64Data) {
+              const res = await fetch(fontObj.base64Data);
+              const arrayBuffer = await res.arrayBuffer();
+              const fontFace = new FontFace(fontObj.name, arrayBuffer);
+              const loadedFace = await fontFace.load();
+              document.fonts.add(loadedFace);
+            }
           } catch (err) {
-            console.error('Error restoring font:', fontObj.name, err);
+            console.warn('Error restoring font:', fontObj.name, err);
           }
         });
       }
     } catch (e) {
-      console.error('Failed to load custom fonts', e);
+      console.warn('Failed to load custom fonts', e);
     }
   }, []);
 
@@ -111,7 +111,7 @@ export default function App() {
     try {
       localStorage.setItem('word_letters_active_fonts', JSON.stringify(newList));
     } catch (e) {
-      console.error('Failed to save active fonts to localStorage', e);
+      console.warn('Failed to save active fonts', e);
     }
   };
 
@@ -123,7 +123,7 @@ export default function App() {
       try {
         localStorage.setItem('word_letters_custom_fonts', JSON.stringify(updated));
       } catch (e) {
-        console.error('Failed to save font to localStorage', e);
+        console.warn('Failed to save font to localStorage', e);
       }
       return updated;
     });
@@ -138,7 +138,11 @@ export default function App() {
     const fontVal = `${fontName}, sans-serif`;
     setCustomFonts((prev) => {
       const filtered = prev.filter((f) => f.name !== fontName);
-      localStorage.setItem('word_letters_custom_fonts', JSON.stringify(filtered));
+      try {
+        localStorage.setItem('word_letters_custom_fonts', JSON.stringify(filtered));
+      } catch (e) {
+        console.warn('Error deleting custom font', e);
+      }
       return filtered;
     });
     setActiveFontValues((prev) => prev.filter((v) => v !== fontVal));
@@ -152,7 +156,45 @@ export default function App() {
       }
     }, 4000);
     return () => clearTimeout(timer);
-  }, [content, docTitle, handleSave]);
+  }, [content, docTitle]);
+
+  const handleSave = useCallback(() => {
+    setIsSaving(true);
+    const wordCount = editorText ? editorText.trim().split(/\s+/).filter(Boolean).length : 0;
+    
+    const updatedDoc = {
+      id: docId,
+      title: docTitle,
+      content,
+      watermark,
+      margins,
+      textDirection,
+      paperColor,
+      wordCount,
+      updatedAt: new Date().toISOString()
+    };
+
+    setSavedLetters((prev) => {
+      const existingIdx = prev.findIndex((d) => d.id === docId);
+      let newArray;
+      if (existingIdx >= 0) {
+        newArray = [...prev];
+        newArray[existingIdx] = updatedDoc;
+      } else {
+        newArray = [updatedDoc, ...prev];
+      }
+      try {
+        localStorage.setItem('word_letters_studio_saved', JSON.stringify(newArray));
+      } catch (e) {
+        console.warn('Error writing localStorage', e);
+      }
+      return newArray;
+    });
+
+    setTimeout(() => {
+      setIsSaving(false);
+    }, 600);
+  }, [docId, docTitle, content, watermark, margins, textDirection, paperColor, editorText]);
 
   // Track Content changes from Tiptap Editor
   const handleContentChange = (html, text) => {
@@ -160,20 +202,26 @@ export default function App() {
     setEditorText(text);
   };
 
-  // Export to PDF using html2pdf
-  const handleExportPDF = () => {
+  // Export to PDF safely with dynamic import
+  const handleExportPDF = async () => {
     const element = document.getElementById('letter-paper-canvas');
     if (!element) return;
 
-    const opt = {
-      margin:       0.3,
-      filename:     docTitle.replace(/\.(docx|doc|txt)$/i, '') + '.pdf',
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true, logging: false },
-      jsPDF:        { unit: 'in', format: 'a4', orientation: orientation }
-    };
+    try {
+      const html2pdfModule = (await import('html2pdf.js')).default;
+      const opt = {
+        margin:       0.3,
+        filename:     docTitle.replace(/\.(docx|doc|txt)$/i, '') + '.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: orientation }
+      };
 
-    html2pdf().set(opt).from(element).save();
+      html2pdfModule().set(opt).from(element).save();
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      window.print();
+    }
   };
 
   // Browser Print
@@ -221,7 +269,11 @@ export default function App() {
   const handleDeleteLetter = (idToDelete) => {
     setSavedLetters((prev) => {
       const filtered = prev.filter((d) => d.id !== idToDelete);
-      localStorage.setItem('word_letters_studio_saved', JSON.stringify(filtered));
+      try {
+        localStorage.setItem('word_letters_studio_saved', JSON.stringify(filtered));
+      } catch (e) {
+        console.warn('Failed to delete saved letter', e);
+      }
       return filtered;
     });
   };

@@ -1,5 +1,5 @@
 // Pre-installed Default Fonts Configuration for LSD-Microsoft Word Studio
-// Bundled fonts stored directly inside public/fonts/
+// Bundled fonts stored directly inside public/fonts/ and loaded natively via CSS @font-face
 
 export const preinstalledFonts = [
   // Lisan al Dawat Fonts
@@ -66,24 +66,3 @@ export const preinstalledFonts = [
     isPreinstalled: true,
   }
 ];
-
-export const loadLocalFontsFolder = async () => {
-  const localTTFFiles = [
-    { name: 'Al-Fatemi', file: '/fonts/Al-Fatemi.ttf' },
-    { name: 'Al-Kanz', file: '/fonts/Al-Kanz.ttf' },
-    { name: 'Amiri-Regular', file: '/fonts/Amiri-Regular.ttf' },
-    { name: 'Kanz-al-Lulu', file: '/fonts/Kanz-al-Lulu.ttf' },
-    { name: 'Kanz-al-Marjaan', file: '/fonts/Kanz-al-Marjaan.ttf' },
-    { name: 'Kanz-al-Yaqoot', file: '/fonts/Kanz-al-Yaqoot.ttf' }
-  ];
-
-  for (const item of localTTFFiles) {
-    try {
-      const fontFace = new FontFace(item.name, `url(${item.file})`);
-      const loaded = await fontFace.load();
-      document.fonts.add(loaded);
-    } catch (e) {
-      console.warn('Could not load font file:', item.name, e);
-    }
-  }
-};
