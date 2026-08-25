@@ -228,7 +228,7 @@ export default function A4EditorCanvas({
           {/* Tiptap Rich Text Content Editable Viewport */}
           <EditorContent 
             editor={editor} 
-            className="h-full min-h-[950px] font-serif leading-relaxed text-gray-900 focus:outline-none"
+            className="h-full min-h-[950px] lisan-dawat-text leading-relaxed text-gray-900 focus:outline-none"
           />
         </div>
       </div>

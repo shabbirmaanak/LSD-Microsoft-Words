@@ -8,35 +8,40 @@
   src: url('/fonts/Al-Fatemi.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Al-Kanz';
   src: url('/fonts/Al-Kanz.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Kanz-al-Lulu';
   src: url('/fonts/Kanz-al-Lulu.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Kanz-al-Marjaan';
   src: url('/fonts/Kanz-al-Marjaan.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 @font-face {
   font-family: 'Kanz-al-Yaqoot';
   src: url('/fonts/Kanz-al-Yaqoot.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @layer base {
   body {
-    font-family: 'Al-Fatemi', 'Al-Kanz', 'Amiri', 'Noto Naskh Arabic', 'Segoe UI', Calibri, Arial, sans-serif;
+    font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Kanz-al-Marjaan', 'Kanz-al-Yaqoot', 'Amiri', 'Segoe UI', Calibri, Arial, serif;
     color: #323130;
   }
 }
@@ -96,7 +101,7 @@
 
 /* Calligraphy Headers */
 .bismillah-header {
-  font-family: 'Al-Fatemi', 'Al-Kanz', 'Amiri', 'Scheherazade New', serif;
+  font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Amiri', serif;
   font-size: 1.85rem;
   font-weight: 700;
   text-align: center;
@@ -105,8 +110,17 @@
   line-height: 1.8;
 }
 
-/* Tiptap Editor Styling */
-.ProseMirror {
+/* Tiptap Editor & Lisan al Dawat Font Ligatures */
+.lisan-dawat-text,
+.ProseMirror,
+.ProseMirror p,
+.ProseMirror span {
+  font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Kanz-al-Marjaan', 'Kanz-al-Yaqoot', 'Amiri', serif;
+  font-feature-settings: "liga" 1, "dlig" 1, "calt" 1, "rlig" 1, "clig" 1;
+  font-variant-ligatures: normal discretionary-ligatures contextual;
+  text-rendering: optimizeLegibility;
+  font-variant: normal;
+  letter-spacing: 0px;
   outline: none !important;
   min-height: 900px;
   font-size: 1.2rem;
