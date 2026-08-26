@@ -49,10 +49,6 @@ export default function Ribbon({
     '#323130', '#605e5c', '#0078d4', '#107c41', '#8a001a'
   ];
 
-  const handlePreventDefault = (e) => {
-    e.preventDefault();
-  };
-
   return (
     <div className="select-none z-20" dir="ltr">
 
@@ -62,10 +58,13 @@ export default function Ribbon({
         {/* Row 1: Font Selector + Size Selector + LTR/RTL Toggle + Keyboard */}
         <div className="flex items-center gap-1.5 justify-between">
           <select
-            onMouseDown={handlePreventDefault}
             onChange={(e) => {
-              if (e.target.value === '__manage__') onOpenFontManagerModal();
-              else editor.chain().focus().setFontFamily(e.target.value).run();
+              const val = e.target.value;
+              if (val === '__manage__') {
+                onOpenFontManagerModal();
+              } else {
+                editor.chain().focus().setFontFamily(val).run();
+              }
             }}
             className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs font-semibold text-gray-900 flex-1 min-w-[110px]"
             defaultValue={visibleFonts[0]?.value || 'Calibri, sans-serif'}
@@ -79,8 +78,9 @@ export default function Ribbon({
           </select>
 
           <select
-            onMouseDown={handlePreventDefault}
-            onChange={(e) => editor.chain().focus().setFontSize?.(e.target.value).run()}
+            onChange={(e) => {
+              editor.chain().focus().setFontSize(e.target.value).run();
+            }}
             className="bg-gray-50 border border-gray-300 rounded px-1.5 py-1 text-xs font-semibold text-gray-900 w-16"
             defaultValue="12pt"
           >
@@ -92,7 +92,6 @@ export default function Ribbon({
           {/* LTR / RTL Direction Toggle */}
           <div className="flex items-center bg-gray-200/80 p-0.5 rounded border border-gray-300">
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => { setTextDirection('ltr'); editor.chain().focus().setTextAlign('left').run(); }}
               className={`px-2 py-0.5 rounded text-xs font-mono font-bold transition-all ${
                 textDirection === 'ltr' ? 'bg-[#106ebe] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
@@ -102,7 +101,6 @@ export default function Ribbon({
               ›¶
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => { setTextDirection('rtl'); editor.chain().focus().setTextAlign('right').run(); }}
               className={`px-2 py-0.5 rounded text-xs font-mono font-bold transition-all ${
                 textDirection === 'rtl' ? 'bg-[#046a38] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
@@ -115,7 +113,6 @@ export default function Ribbon({
 
           {/* On-Screen Keyboard Button */}
           <button
-            onMouseDown={handlePreventDefault}
             onClick={onToggleArabicKeyboard}
             className="bg-emerald-700 hover:bg-emerald-800 text-white p-1.5 rounded transition-colors shadow-xs"
             title="Open Arabic / Lisan al Dawat Keyboard"
@@ -128,7 +125,6 @@ export default function Ribbon({
         <div className="flex items-center gap-1 justify-between border-t border-b border-gray-100 py-1">
           <div className="flex items-center gap-0.5">
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().toggleBold().run()}
               className={`p-1.5 rounded font-bold text-xs ${
                 editor.isActive('bold') ? 'bg-blue-100 text-[#106ebe] font-bold border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
@@ -138,7 +134,6 @@ export default function Ribbon({
               <Bold className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().toggleItalic().run()}
               className={`p-1.5 rounded text-xs ${
                 editor.isActive('italic') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
@@ -148,7 +143,6 @@ export default function Ribbon({
               <Italic className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().toggleUnderline().run()}
               className={`p-1.5 rounded text-xs ${
                 editor.isActive('underline') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
@@ -158,7 +152,6 @@ export default function Ribbon({
               <Underline className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().toggleStrike().run()}
               className={`p-1.5 rounded text-xs ${
                 editor.isActive('strike') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
@@ -169,7 +162,6 @@ export default function Ribbon({
             </button>
             <div className="relative">
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => setShowColorPicker(!showColorPicker)}
                 className="p-1.5 rounded text-xs hover:bg-gray-100 text-gray-700"
                 title="Font Color"
@@ -182,7 +174,6 @@ export default function Ribbon({
                   {colorSwatches.map((color) => (
                     <button
                       key={color}
-                      onMouseDown={handlePreventDefault}
                       onClick={() => {
                         editor.chain().focus().setColor(color).run();
                         setShowColorPicker(false);
@@ -198,7 +189,6 @@ export default function Ribbon({
 
           <div className="flex items-center gap-1">
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().undo().run()}
               disabled={!editor.can().undo()}
               className="p-1.5 rounded text-xs hover:bg-gray-100 disabled:opacity-30"
@@ -207,7 +197,6 @@ export default function Ribbon({
               <RotateCcw className="w-4 h-4 text-gray-700" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().redo().run()}
               disabled={!editor.can().redo()}
               className="p-1.5 rounded text-xs hover:bg-gray-100 disabled:opacity-30"
@@ -222,7 +211,6 @@ export default function Ribbon({
         <div className="flex items-center gap-1 justify-between">
           <div className="flex items-center gap-0.5">
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().toggleBulletList().run()}
               className={`p-1.5 rounded ${
                 editor.isActive('bulletList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
@@ -232,7 +220,6 @@ export default function Ribbon({
               <List className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().toggleOrderedList().run()}
               className={`p-1.5 rounded ${
                 editor.isActive('orderedList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
@@ -245,7 +232,6 @@ export default function Ribbon({
 
           <div className="flex items-center gap-0.5">
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().setTextAlign('left').run()}
               className={`p-1.5 rounded ${
                 editor.isActive({ textAlign: 'left' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
@@ -255,7 +241,6 @@ export default function Ribbon({
               <AlignLeft className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().setTextAlign('center').run()}
               className={`p-1.5 rounded ${
                 editor.isActive({ textAlign: 'center' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
@@ -265,7 +250,6 @@ export default function Ribbon({
               <AlignCenter className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().setTextAlign('right').run()}
               className={`p-1.5 rounded ${
                 editor.isActive({ textAlign: 'right' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
@@ -275,7 +259,6 @@ export default function Ribbon({
               <AlignRight className="w-4 h-4" />
             </button>
             <button
-              onMouseDown={handlePreventDefault}
               onClick={() => editor.chain().focus().setTextAlign('justify').run()}
               className={`p-1.5 rounded ${
                 editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
@@ -290,28 +273,24 @@ export default function Ribbon({
         {/* Row 4: Quick Insert & Actions */}
         <div className="flex items-center gap-1.5 justify-between pt-1 border-t border-gray-100 overflow-x-auto no-scrollbar">
           <button
-            onMouseDown={handlePreventDefault}
             onClick={() => onInsertBlock('bismillah')}
             className="bg-emerald-800 hover:bg-emerald-900 text-white px-2 py-1 rounded text-[10px] font-serif font-bold whitespace-nowrap shadow-xs"
           >
             بِسْمِ اللَّهِ
           </button>
           <button
-            onMouseDown={handlePreventDefault}
             onClick={onInsertDate}
             className="bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap shadow-2xs"
           >
             Insert Date
           </button>
           <button
-            onMouseDown={handlePreventDefault}
             onClick={onOpenTemplateModal}
             className="bg-[#106ebe] hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[11px] font-medium whitespace-nowrap shadow-xs"
           >
             Templates
           </button>
           <button
-            onMouseDown={handlePreventDefault}
             onClick={onNewLetter}
             className="bg-green-700 hover:bg-green-800 text-white px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap shadow-xs"
           >
@@ -350,7 +329,6 @@ export default function Ribbon({
               {/* Undo / Redo group */}
               <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().undo().run()}
                   disabled={!editor.can().undo()}
                   className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-30 transition-colors"
@@ -359,7 +337,6 @@ export default function Ribbon({
                   <RotateCcw className="w-4 h-4 text-gray-700" />
                 </button>
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().redo().run()}
                   disabled={!editor.can().redo()}
                   className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-30 transition-colors"
@@ -372,12 +349,12 @@ export default function Ribbon({
               {/* Font Family & Size Selector */}
               <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
                 <select
-                  onMouseDown={handlePreventDefault}
                   onChange={(e) => {
-                    if (e.target.value === '__manage__') {
+                    const val = e.target.value;
+                    if (val === '__manage__') {
                       onOpenFontManagerModal();
                     } else {
-                      editor.chain().focus().setFontFamily(e.target.value).run();
+                      editor.chain().focus().setFontFamily(val).run();
                     }
                   }}
                   className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600 font-semibold text-gray-900 min-w-[160px]"
@@ -394,9 +371,10 @@ export default function Ribbon({
                 </select>
 
                 <select
-                  onMouseDown={handlePreventDefault}
-                  onChange={(e) => editor.chain().focus().setFontSize?.(e.target.value).run()}
-                  className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600"
+                  onChange={(e) => {
+                    editor.chain().focus().setFontSize(e.target.value).run();
+                  }}
+                  className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600 font-semibold text-gray-900"
                   defaultValue="12pt"
                 >
                   {fontSizes.map((s) => (
@@ -408,7 +386,6 @@ export default function Ribbon({
               {/* Font Formatting: B I U S Sub Sup */}
               <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleBold().run()}
                   className={`p-1.5 rounded transition-colors ${
                     editor.isActive('bold') ? 'bg-blue-100 text-[#106ebe] font-bold border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
@@ -419,7 +396,6 @@ export default function Ribbon({
                 </button>
 
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleItalic().run()}
                   className={`p-1.5 rounded transition-colors ${
                     editor.isActive('italic') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
@@ -430,7 +406,6 @@ export default function Ribbon({
                 </button>
 
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleUnderline().run()}
                   className={`p-1.5 rounded transition-colors ${
                     editor.isActive('underline') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
@@ -441,7 +416,6 @@ export default function Ribbon({
                 </button>
 
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleStrike().run()}
                   className={`p-1.5 rounded transition-colors ${
                     editor.isActive('strike') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
@@ -452,7 +426,6 @@ export default function Ribbon({
                 </button>
 
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleSubscript().run()}
                   className={`p-1.5 rounded transition-colors ${
                     editor.isActive('subscript') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
@@ -463,7 +436,6 @@ export default function Ribbon({
                 </button>
 
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleSuperscript().run()}
                   className={`p-1.5 rounded transition-colors ${
                     editor.isActive('superscript') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
@@ -477,7 +449,6 @@ export default function Ribbon({
               {/* Color Palette */}
               <div className="flex items-center gap-1 border-r border-gray-300 pr-3 relative">
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => setShowColorPicker(!showColorPicker)}
                   className="p-1.5 hover:bg-gray-200 rounded flex items-center gap-1 text-gray-700"
                   title="Font Color"
@@ -490,7 +461,6 @@ export default function Ribbon({
                     {colorSwatches.map((color) => (
                       <button
                         key={color}
-                        onMouseDown={handlePreventDefault}
                         onClick={() => {
                           editor.chain().focus().setColor(color).run();
                           setShowColorPicker(false);
@@ -506,7 +476,6 @@ export default function Ribbon({
               {/* Alignment */}
               <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().setTextAlign('left').run()}
                   className={`p-1.5 rounded ${editor.isActive({ textAlign: 'left' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
                   title="Align Left"
@@ -514,7 +483,6 @@ export default function Ribbon({
                   <AlignLeft className="w-4 h-4" />
                 </button>
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().setTextAlign('center').run()}
                   className={`p-1.5 rounded ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
                   title="Align Center"
@@ -522,7 +490,6 @@ export default function Ribbon({
                   <AlignCenter className="w-4 h-4" />
                 </button>
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().setTextAlign('right').run()}
                   className={`p-1.5 rounded ${editor.isActive({ textAlign: 'right' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
                   title="Align Right"
@@ -530,7 +497,6 @@ export default function Ribbon({
                   <AlignRight className="w-4 h-4" />
                 </button>
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().setTextAlign('justify').run()}
                   className={`p-1.5 rounded ${editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
                   title="Justify"
@@ -542,7 +508,6 @@ export default function Ribbon({
               {/* Lists */}
               <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleBulletList().run()}
                   className={`p-1.5 rounded ${editor.isActive('bulletList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
                   title="Bullet List"
@@ -550,7 +515,6 @@ export default function Ribbon({
                   <List className="w-4 h-4" />
                 </button>
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => editor.chain().focus().toggleOrderedList().run()}
                   className={`p-1.5 rounded ${editor.isActive('orderedList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
                   title="Numbered List"
@@ -562,7 +526,6 @@ export default function Ribbon({
               {/* LTR & RTL Paragraph Direction Buttons */}
               <div className="flex items-center gap-1 bg-gray-200/80 p-1 rounded-md border border-gray-300">
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => {
                     setTextDirection('ltr');
                     editor.chain().focus().setTextAlign('left').run();
@@ -578,7 +541,6 @@ export default function Ribbon({
                 </button>
 
                 <button
-                  onMouseDown={handlePreventDefault}
                   onClick={() => {
                     setTextDirection('rtl');
                     editor.chain().focus().setTextAlign('right').run();
@@ -596,7 +558,6 @@ export default function Ribbon({
 
               {/* Arabic Keyboard Toggle */}
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={onToggleArabicKeyboard}
                 className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs transition-colors"
                 title="Open On-Screen Arabic & Lisan al Dawat Virtual Keyboard"
@@ -611,7 +572,6 @@ export default function Ribbon({
           {activeTab === 'insert' && (
             <div className="flex items-center gap-3">
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={onInsertDate}
                 className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
               >
@@ -620,7 +580,6 @@ export default function Ribbon({
               </button>
 
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => onInsertBlock('bismillah')}
                 className="flex items-center gap-1.5 bg-emerald-800 hover:bg-emerald-900 text-white font-serif px-3 py-1.5 rounded text-xs font-bold shadow-sm"
               >
@@ -628,7 +587,6 @@ export default function Ribbon({
               </button>
 
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => editor.chain().focus().setHorizontalRule().run()}
                 className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
               >
@@ -636,7 +594,6 @@ export default function Ribbon({
               </button>
 
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
                 className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
               >
@@ -671,7 +628,6 @@ export default function Ribbon({
                   {['normal', 'narrow', 'wide'].map((m) => (
                     <button
                       key={m}
-                      onMouseDown={handlePreventDefault}
                       onClick={() => setMargins(m)}
                       className={`px-2.5 py-1 rounded capitalize font-medium ${
                         margins === m ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
@@ -687,7 +643,6 @@ export default function Ribbon({
                 <span className="font-medium text-gray-600">Orientation:</span>
                 <div className="flex bg-white border border-gray-300 rounded p-0.5 shadow-sm">
                   <button
-                    onMouseDown={handlePreventDefault}
                     onClick={() => setOrientation('portrait')}
                     className={`px-2.5 py-1 rounded capitalize font-medium ${
                       orientation === 'portrait' ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
@@ -696,7 +651,6 @@ export default function Ribbon({
                     Portrait
                   </button>
                   <button
-                    onMouseDown={handlePreventDefault}
                     onClick={() => setOrientation('landscape')}
                     className={`px-2.5 py-1 rounded capitalize font-medium ${
                       orientation === 'landscape' ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
@@ -713,7 +667,6 @@ export default function Ribbon({
           {activeTab === 'templates' && (
             <div className="flex items-center gap-3">
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={onOpenTemplateModal}
                 className="flex items-center gap-2 bg-[#106ebe] hover:bg-blue-700 text-white font-medium px-4 py-1.5 rounded shadow-sm"
               >
@@ -723,21 +676,18 @@ export default function Ribbon({
               <span className="text-gray-400">|</span>
               <span className="text-gray-600 font-bold">Quick Pick:</span>
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => onInsertBlock('template-formal')}
                 className="bg-white border border-gray-300 hover:bg-gray-50 px-2.5 py-1 rounded text-gray-700 font-medium"
               >
                 Formal Business
               </button>
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => onInsertBlock('template-lisan-arzi')}
                 className="bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1 rounded text-emerald-900 font-bold font-serif"
               >
                 عريضة لسان الدعوة (Arzi)
               </button>
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={() => onInsertBlock('template-lisan-business')}
                 className="bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1 rounded text-emerald-900 font-bold font-serif"
               >
@@ -750,7 +700,6 @@ export default function Ribbon({
           {activeTab === 'file' && (
             <div className="flex items-center gap-3">
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={onNewLetter}
                 className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded text-gray-800 font-medium shadow-sm"
               >
@@ -759,7 +708,6 @@ export default function Ribbon({
               </button>
 
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={onExportPDF}
                 className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-medium shadow-sm"
               >
@@ -768,7 +716,6 @@ export default function Ribbon({
               </button>
 
               <button
-                onMouseDown={handlePreventDefault}
                 onClick={onPrint}
                 className="flex items-center gap-1.5 bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded font-medium shadow-sm"
               >
