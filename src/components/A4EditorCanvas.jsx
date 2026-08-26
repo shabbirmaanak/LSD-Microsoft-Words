@@ -144,11 +144,14 @@ export default function A4EditorCanvas({
     }
   }, [editor, setEditorInstance]);
 
+  const isLandscape = orientation === 'landscape';
+  const maxWidthClass = isLandscape ? 'max-w-[1123px]' : 'max-w-[794px]';
+
   return (
     <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 no-print select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
       
       {/* Top Horizontal Ruler (Hidden on small mobile) */}
-      <div className="hidden sm:flex max-w-[794px] w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm" dir={textDirection}>
+      <div className={`hidden sm:flex ${maxWidthClass} w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm`} dir={textDirection}>
         <span>٠</span>
         <span>١</span>
         <span>٢</span>
@@ -162,13 +165,13 @@ export default function A4EditorCanvas({
 
       {/* A4 Paper Container with Zoom Scaling */}
       <div 
-        className="w-full max-w-[794px] transition-transform origin-top duration-150 ease-out flex justify-center"
+        className={`w-full ${maxWidthClass} transition-all origin-top duration-150 ease-out flex justify-center`}
         style={{ transform: `scale(${zoomLevel / 100})` }}
       >
         <div 
           id="letter-paper-canvas"
           dir={textDirection}
-          className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all`}
+          className={`a4-paper ${isLandscape ? 'a4-landscape' : ''} paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all`}
           style={{ backgroundColor: paperColor || '#ffffff' }}
         >
           {/* Watermark Overlay */}

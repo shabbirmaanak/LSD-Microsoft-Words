@@ -67,6 +67,12 @@
   transition: all 0.2s ease-in-out;
 }
 
+/* Landscape Mode */
+.a4-paper.a4-landscape {
+  max-width: 1123px !important; /* 297mm at 96 DPI */
+  min-height: 794px !important;  /* 210mm at 96 DPI */
+}
+
 @media (max-width: 768px) {
   .a4-paper {
     min-height: auto;
