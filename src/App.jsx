@@ -537,6 +537,7 @@ export default function App() {
           }
         }}
         customFonts={customFonts}
+        onAddCustomFont={handleAddCustomFont}
         onRemoveCustomFont={handleRemoveCustomFont}
       />
 

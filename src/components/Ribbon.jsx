@@ -630,6 +630,15 @@ export default function Ribbon({
           {activeTab === 'insert' && (
             <div className="flex items-center gap-3">
               <button
+                onClick={() => document.getElementById('image-upload-input')?.click()}
+                className="flex items-center gap-1.5 bg-purple-700 hover:bg-purple-800 text-white px-3 py-1.5 rounded font-bold shadow-sm transition-colors"
+                title="Insert Image from device"
+              >
+                <Image className="w-4 h-4 text-purple-200" />
+                <span>Insert Image</span>
+              </button>
+
+              <button
                 onClick={onInsertDate}
                 className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
               >

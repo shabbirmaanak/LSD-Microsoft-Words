@@ -230,11 +230,81 @@ export default function A4EditorCanvas({
             </BubbleMenu>
           )}
 
+          {/* Floating Image Action Toolbar */}
+          {editor && (
+            <BubbleMenu
+              editor={editor}
+              shouldShow={({ editor }) => editor.isActive('image')}
+              tippyOptions={{ duration: 100, placement: 'top' }}
+              className="bg-slate-900 text-white rounded-lg shadow-2xl px-2.5 py-1.5 flex items-center gap-1.5 border border-slate-700 text-xs z-50 no-print flex-wrap"
+            >
+              <span className="text-[11px] font-bold text-amber-400 border-r border-slate-700 pr-1.5">Image:</span>
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-left' }).run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded font-semibold text-[11px] transition-colors"
+                title="Wrap Text Right (Float Left)"
+              >
+                Wrap Left
+              </button>
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-center' }).run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded font-semibold text-[11px] transition-colors"
+                title="Center Inline"
+              >
+                Center
+              </button>
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-right' }).run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded font-semibold text-[11px] transition-colors"
+                title="Wrap Text Left (Float Right)"
+              >
+                Wrap Right
+              </button>
+
+              <div className="w-[1px] h-3.5 bg-slate-700"></div>
+
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 25%' }).run()}
+                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
+              >
+                25%
+              </button>
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 50%' }).run()}
+                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
+              >
+                50%
+              </button>
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 75%' }).run()}
+                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
+              >
+                75%
+              </button>
+              <button
+                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 100%' }).run()}
+                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
+              >
+                100%
+              </button>
+
+              <div className="w-[1px] h-3.5 bg-slate-700"></div>
+
+              <button
+                onClick={() => editor.chain().focus().deleteSelection().run()}
+                className="px-2 py-0.5 bg-red-700 hover:bg-red-800 text-white rounded font-bold text-[11px] transition-colors"
+                title="Delete Image"
+              >
+                Delete
+              </button>
+            </BubbleMenu>
+          )}
+
           {/* Floating Bubble Formatting Toolbar */}
           {editor && (
             <BubbleMenu 
               editor={editor} 
-              shouldShow={({ editor }) => !editor.isActive('table') && !editor.state.selection.empty}
+              shouldShow={({ editor }) => !editor.isActive('table') && !editor.isActive('image') && !editor.state.selection.empty}
               tippyOptions={{ duration: 100 }}
               className="bg-gray-900 text-white rounded-lg shadow-xl px-2 py-1 flex items-center gap-1 border border-gray-700 text-xs z-50"
             >

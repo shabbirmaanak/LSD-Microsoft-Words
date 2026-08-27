@@ -17,6 +17,7 @@ export default function AdminCMSModal({
   templates = [],
   onSaveTemplates,
   customFonts = [],
+  onAddCustomFont,
   onRemoveCustomFont
 }) {
   const [passcode, setPasscode] = useState('');
@@ -283,12 +284,57 @@ export default function AdminCMSModal({
               {/* 2. CUSTOM FONTS TAB */}
               {activeTab === 'fonts' && (
                 <div className="space-y-4">
-                  <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs">
-                    <h4 className="font-bold text-sm text-gray-900 mb-2">Platform Custom Fonts</h4>
-                    <p className="text-xs text-gray-500 mb-4">Manage custom TTF/OTF fonts uploaded to the platform.</p>
+                  <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                      <div>
+                        <h4 className="font-bold text-sm text-gray-900">Platform Custom Fonts</h4>
+                        <p className="text-xs text-gray-500">Upload and manage custom TTF/OTF/WOFF fonts for the entire platform.</p>
+                      </div>
+
+                      <label className="bg-blue-700 hover:bg-blue-800 text-white px-3.5 py-2 rounded-lg font-bold text-xs shadow-xs cursor-pointer transition-colors flex items-center gap-1.5">
+                        <Type className="w-4 h-4 text-blue-200" />
+                        <span>Upload New TTF/OTF Font</span>
+                        <input
+                          type="file"
+                          accept=".ttf,.otf,.woff,.woff2"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (!file) return;
+
+                            const fontName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+                            const reader = new FileReader();
+                            reader.onload = async (event) => {
+                              const base64Data = event.target.result;
+                              try {
+                                const res = await fetch(base64Data);
+                                const arrayBuffer = await res.arrayBuffer();
+                                const fontFace = new FontFace(fontName, arrayBuffer);
+                                const loadedFace = await fontFace.load();
+                                document.fonts.add(loadedFace);
+
+                                const newFontObj = {
+                                  name: fontName,
+                                  base64Data,
+                                  format: file.name.split('.').pop().toUpperCase()
+                                };
+
+                                if (onAddCustomFont) {
+                                  onAddCustomFont(newFontObj);
+                                  alert(`✅ Font "${fontName}" uploaded & published successfully!`);
+                                }
+                              } catch (err) {
+                                alert('❌ Error loading font file: ' + err.message);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                    </div>
                     
                     {customFonts.length === 0 ? (
-                      <p className="text-xs text-gray-400 italic">No custom fonts uploaded yet. Use the Font Manager in the ribbon to add TTF fonts.</p>
+                      <p className="text-xs text-gray-400 italic">No custom fonts uploaded yet. Click "Upload New TTF/OTF Font" above to publish your first font.</p>
                     ) : (
                       <div className="space-y-2">
                         {customFonts.map((font) => (
