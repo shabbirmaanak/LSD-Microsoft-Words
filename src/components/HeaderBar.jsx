@@ -126,7 +126,7 @@ export default function HeaderBar({
 
         <button
           onClick={onPrint}
-          className="p-1 sm:p-1.5 hover:bg-blue-700/60 rounded text-blue-100 hover:text-white transition-colors hidden sm:block"
+          className="p-1 sm:p-1.5 hover:bg-blue-700/60 rounded text-blue-100 hover:text-white transition-colors"
           title="Print Document"
         >
           <Printer className="w-4 h-4 sm:w-4.5 sm:h-4.5" />

@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { X, Search, LayoutTemplate, ArrowRight, Check } from 'lucide-react';
 import { letterTemplates } from '../data/letterTemplates';
 
-export default function TemplateModal({ isOpen, onClose, onSelectTemplate }) {
+export default function TemplateModal({ isOpen, onClose, onSelectTemplate, templates = letterTemplates }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
   if (!isOpen) return null;
 
-  const categories = ['All', 'Business', 'Careers', 'HR & Personnel', 'Customer & Consumer', 'Academic & Reference', 'Legal', 'Personal'];
+  const categories = ['All', 'Official', 'Business', 'Careers', 'HR & Personnel', 'Customer & Consumer', 'Academic & Reference', 'Legal', 'Personal'];
 
-  const filteredTemplates = letterTemplates.filter((t) => {
+  const filteredTemplates = (templates || letterTemplates).filter((t) => {
     const matchesCategory = selectedCategory === 'All' || t.category === selectedCategory;
     const matchesSearch = t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                           t.description.toLowerCase().includes(searchQuery.toLowerCase());

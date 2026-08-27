@@ -9,6 +9,7 @@ import SavedDocsModal from './components/SavedDocsModal';
 import ArabicKeyboard from './components/ArabicKeyboard';
 import FontUploadModal from './components/FontUploadModal';
 import FontManagerModal from './components/FontManagerModal';
+import AdminCMSModal from './components/AdminCMSModal';
 import { letterTemplates } from './data/letterTemplates';
 import { preinstalledFonts } from './config/defaultFonts';
 
@@ -19,6 +20,10 @@ export default function App() {
   const [content, setContent] = useState('<p></p>');
   const [editorText, setEditorText] = useState('');
   const [editorInstance, setEditorInstance] = useState(null);
+
+  // Custom Templates & Admin Panel State
+  const [customTemplates, setCustomTemplates] = useState(letterTemplates);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Layout & Language Settings
   const [textDirection, setTextDirection] = useState('ltr');
@@ -54,7 +59,27 @@ export default function App() {
 
   // Load Custom Uploaded Fonts & Saved Letters safely on Mount
   useEffect(() => {
-    // 1. Load Saved Letters
+    // 0. Check secret URL route /admin or ?admin=true for Admin CMS Studio
+    const isPathAdmin = window.location.pathname === '/admin';
+    const isQueryAdmin = window.location.search.includes('admin=true');
+    if (isPathAdmin || isQueryAdmin) {
+      setIsAdminOpen(true);
+    }
+
+    // 1. Load Custom Published Templates
+    try {
+      const storedTpls = localStorage.getItem('word_letters_custom_templates');
+      if (storedTpls) {
+        const parsed = JSON.parse(storedTpls);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setCustomTemplates(parsed);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to load custom templates', e);
+    }
+
+    // 2. Load Saved Letters
     try {
       const stored = localStorage.getItem('word_letters_studio_saved');
       if (stored) setSavedLetters(JSON.parse(stored));
@@ -420,6 +445,7 @@ export default function App() {
         isOpen={isTemplateModalOpen}
         onClose={() => setIsTemplateModalOpen(false)}
         onSelectTemplate={handleSelectTemplate}
+        templates={customTemplates}
       />
 
       <SavedDocsModal
@@ -447,6 +473,23 @@ export default function App() {
         onSaveActiveFonts={handleSaveActiveFonts}
         customFonts={customFonts}
         onOpenFontUploadModal={() => setIsFontUploadModalOpen(true)}
+      />
+
+      {/* Secret Admin CMS Modal */}
+      <AdminCMSModal
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        templates={customTemplates}
+        onSaveTemplates={(newTpls) => {
+          setCustomTemplates(newTpls);
+          try {
+            localStorage.setItem('word_letters_custom_templates', JSON.stringify(newTpls));
+          } catch (e) {
+            console.warn('Failed to save templates', e);
+          }
+        }}
+        customFonts={customFonts}
+        onRemoveCustomFont={handleRemoveCustomFont}
       />
 
     </div>

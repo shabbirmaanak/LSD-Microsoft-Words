@@ -4,7 +4,7 @@ import {
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Indent, Outdent,
   Highlighter, Palette, RotateCcw, RotateCw,
-  Table, Calendar, User, FileText, Stamp,
+  Table, Calendar, User, FileText, Stamp, Image,
   Printer, Download, Plus, Layout, Type, Sparkles, Keyboard, Upload, Settings,
   AArrowUp, AArrowDown, Eraser, CaseUpper
 } from 'lucide-react';
@@ -271,31 +271,77 @@ export default function Ribbon({
           </div>
         </div>
 
-        {/* Row 4: Quick Insert & Actions */}
+        {/* Hidden Image File Input */}
+        <input
+          type="file"
+          id="image-upload-input"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (event) => {
+                editor.chain().focus().setImage({ src: event.target.result }).run();
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+        />
+
+        {/* Row 4: Page Layout & Actions (Landscape, Print, PDF, Insert Image, Table) */}
         <div className="flex items-center gap-1.5 justify-between pt-1 border-t border-gray-100 overflow-x-auto no-scrollbar">
+          <button
+            onClick={() => setOrientation(orientation === 'portrait' ? 'landscape' : 'portrait')}
+            className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors shadow-2xs ${
+              orientation === 'landscape' ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+            }`}
+            title="Toggle Page Orientation (Portrait / Landscape)"
+          >
+            {orientation === 'landscape' ? '📐 Landscape' : '📄 Portrait'}
+          </button>
+
+          <button
+            onClick={() => document.getElementById('image-upload-input')?.click()}
+            className="bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
+            title="Insert Image from device"
+          >
+            <Image className="w-3.5 h-3.5 text-purple-200" />
+            <span>Image</span>
+          </button>
+
+          <button
+            onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+            className="bg-indigo-700 hover:bg-indigo-800 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
+            title="Insert 3x3 Table"
+          >
+            <Table className="w-3.5 h-3.5 text-indigo-200" />
+            <span>Table</span>
+          </button>
+
+          <button
+            onClick={onExportPDF}
+            className="bg-blue-700 hover:bg-blue-800 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
+            title="Export as PDF"
+          >
+            <Download className="w-3.5 h-3.5 text-blue-200" />
+            <span>PDF</span>
+          </button>
+
+          <button
+            onClick={onPrint}
+            className="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
+            title="Print Letter Document"
+          >
+            <Printer className="w-3.5 h-3.5 text-gray-200" />
+            <span>Print</span>
+          </button>
+
           <button
             onClick={() => onInsertBlock('bismillah')}
             className="bg-emerald-800 hover:bg-emerald-900 text-white px-2 py-1 rounded text-[10px] font-serif font-bold whitespace-nowrap shadow-xs"
           >
             بِسْمِ اللَّهِ
-          </button>
-          <button
-            onClick={onInsertDate}
-            className="bg-gray-100 border border-gray-300 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap shadow-2xs"
-          >
-            Insert Date
-          </button>
-          <button
-            onClick={onOpenTemplateModal}
-            className="bg-[#106ebe] hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[11px] font-medium whitespace-nowrap shadow-xs"
-          >
-            Templates
-          </button>
-          <button
-            onClick={onNewLetter}
-            className="bg-green-700 hover:bg-green-800 text-white px-2 py-1 rounded text-[11px] font-medium whitespace-nowrap shadow-xs"
-          >
-            New Blank
           </button>
         </div>
       </div>
