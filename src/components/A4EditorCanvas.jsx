@@ -197,7 +197,7 @@ export default function A4EditorCanvas({
     }
   }, [editor, setEditorInstance]);
 
-  // Interactive direct corner drag handle for selected image
+  // 60FPS Ultra-Smooth Interactive Direct Drag Resize (Mouse & Touch)
   useEffect(() => {
     if (!editor) return;
 
@@ -205,45 +205,78 @@ export default function A4EditorCanvas({
     let startX = 0;
     let startWidth = 0;
     let targetImg = null;
+    let currentPercent = '50%';
 
-    const handleMouseDown = (e) => {
-      const img = e.target.closest('.ProseMirror img');
-      if (!img) return;
+    const handleStart = (clientX, clientY, target) => {
+      const img = target.closest('.ProseMirror img');
+      if (!img) return false;
 
       const rect = img.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const clickY = e.clientY - rect.top;
+      const clickX = clientX - rect.left;
+      const clickY = clientY - rect.top;
 
-      // Check if click is anywhere on the selected image or near bottom-right corner
-      if (clickX >= rect.width - 40 && clickY >= rect.height - 40) {
-        e.preventDefault();
+      // Allow dragging anywhere on selected image or bottom-right corner
+      if (img.classList.contains('ProseMirror-selectednode') || (clickX >= rect.width - 50 && clickY >= rect.height - 50)) {
         isDragging = true;
-        startX = e.clientX;
+        startX = clientX;
         startWidth = rect.width;
         targetImg = img;
         document.body.style.cursor = 'nwse-resize';
+        return true;
+      }
+      return false;
+    };
+
+    const handleMouseDown = (e) => {
+      if (handleStart(e.clientX, e.clientY, e.target)) {
+        e.preventDefault();
       }
     };
 
-    const handleMouseMove = (e) => {
+    const handleTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        if (handleStart(touch.clientX, touch.clientY, e.target)) {
+          e.preventDefault();
+        }
+      }
+    };
+
+    const handleMove = (clientX) => {
       if (!isDragging || !targetImg) return;
-      e.preventDefault();
 
       const paper = document.getElementById('letter-paper-canvas');
       const paperWidth = paper ? paper.clientWidth - 100 : 700;
-      const deltaX = e.clientX - startX;
-      const newPxWidth = Math.max(80, Math.min(paperWidth, startWidth + deltaX));
-      const newPercent = Math.round((newPxWidth / paperWidth) * 100) + '%';
+      const deltaX = clientX - startX;
+      const newPxWidth = Math.max(60, Math.min(paperWidth, startWidth + deltaX));
+      currentPercent = Math.round((newPxWidth / paperWidth) * 100) + '%';
 
-      editor.chain().focus().updateAttributes('image', {
-        width: newPercent,
-        style: `width: ${newPercent}; max-width: 100%; height: auto;`
-      }).run();
+      // 60FPS Direct GPU-accelerated DOM mutation
+      targetImg.style.width = currentPercent;
+      targetImg.setAttribute('width', currentPercent);
     };
 
-    const handleMouseUp = () => {
+    const handleMouseMove = (e) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      handleMove(e.clientX);
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isDragging || e.touches.length === 0) return;
+      e.preventDefault();
+      handleMove(e.touches[0].clientX);
+    };
+
+    const handleEnd = () => {
       if (isDragging) {
         isDragging = false;
+        if (targetImg) {
+          editor.chain().focus().updateAttributes('image', {
+            width: currentPercent,
+            style: `width: ${currentPercent}; max-width: 100%; height: auto;`
+          }).run();
+        }
         targetImg = null;
         document.body.style.cursor = '';
       }
@@ -251,12 +284,20 @@ export default function A4EditorCanvas({
 
     window.addEventListener('mousedown', handleMouseDown);
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener('mouseup', handleEnd);
+
+    window.addEventListener('touchstart', handleTouchStart, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener('touchend', handleEnd);
 
     return () => {
       window.removeEventListener('mousedown', handleMouseDown);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener('mouseup', handleEnd);
+
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleEnd);
     };
   }, [editor]);
 
@@ -403,8 +444,16 @@ export default function A4EditorCanvas({
                   type="range"
                   min="10"
                   max="100"
-                  step="5"
-                  value={parseInt(editor.getAttributes('image').width || '50', 10)}
+                  step="1"
+                  defaultValue={parseInt(editor.getAttributes('image').width || '50', 10)}
+                  onInput={(e) => {
+                    const val = e.target.value + '%';
+                    const imgEl = document.querySelector('.ProseMirror img.ProseMirror-selectednode');
+                    if (imgEl) {
+                      imgEl.style.width = val;
+                      imgEl.setAttribute('width', val);
+                    }
+                  }}
                   onChange={(e) => {
                     const newWidth = e.target.value + '%';
                     editor.chain().focus().updateAttributes('image', { 
@@ -412,7 +461,7 @@ export default function A4EditorCanvas({
                       style: `width: ${newWidth}; max-width: 100%; height: auto;`
                     }).run();
                   }}
-                  className="w-24 accent-blue-500 cursor-pointer"
+                  className="w-28 accent-blue-500 cursor-pointer"
                 />
                 <span className="text-[11px] font-mono text-amber-300 w-10">{editor.getAttributes('image').width || '50%'}</span>
 
