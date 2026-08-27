@@ -278,7 +278,8 @@
 
 .ProseMirror img.ProseMirror-selectednode {
   outline: 3px solid #106ebe !important;
-  box-shadow: 0 0 10px rgba(16, 110, 190, 0.4) !important;
+  box-shadow: 0 0 12px rgba(16, 110, 190, 0.5) !important;
+  cursor: nwse-resize !important;
 }
 
 .ProseMirror img.align-left,

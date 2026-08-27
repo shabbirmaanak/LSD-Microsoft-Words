@@ -191,12 +191,74 @@ export default function A4EditorCanvas({
     },
   });
 
-  // Share editor instance with parent app & ribbon
   useEffect(() => {
-    if (editor) {
+    if (editor && setEditorInstance) {
       setEditorInstance(editor);
     }
   }, [editor, setEditorInstance]);
+
+  // Interactive direct corner drag handle for selected image
+  useEffect(() => {
+    if (!editor) return;
+
+    let isDragging = false;
+    let startX = 0;
+    let startWidth = 0;
+    let targetImg = null;
+
+    const handleMouseDown = (e) => {
+      const img = e.target.closest('.ProseMirror img');
+      if (!img) return;
+
+      const rect = img.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+
+      // Check if click is anywhere on the selected image or near bottom-right corner
+      if (clickX >= rect.width - 40 && clickY >= rect.height - 40) {
+        e.preventDefault();
+        isDragging = true;
+        startX = e.clientX;
+        startWidth = rect.width;
+        targetImg = img;
+        document.body.style.cursor = 'nwse-resize';
+      }
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isDragging || !targetImg) return;
+      e.preventDefault();
+
+      const paper = document.getElementById('letter-paper-canvas');
+      const paperWidth = paper ? paper.clientWidth - 100 : 700;
+      const deltaX = e.clientX - startX;
+      const newPxWidth = Math.max(80, Math.min(paperWidth, startWidth + deltaX));
+      const newPercent = Math.round((newPxWidth / paperWidth) * 100) + '%';
+
+      editor.chain().focus().updateAttributes('image', {
+        width: newPercent,
+        style: `width: ${newPercent}; max-width: 100%; height: auto;`
+      }).run();
+    };
+
+    const handleMouseUp = () => {
+      if (isDragging) {
+        isDragging = false;
+        targetImg = null;
+        document.body.style.cursor = '';
+      }
+    };
+
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [editor]);
 
   const isLandscape = orientation === 'landscape';
   const maxWidthClass = isLandscape ? 'max-w-[1123px]' : 'max-w-[794px]';
@@ -289,7 +351,7 @@ export default function A4EditorCanvas({
             <BubbleMenu
               editor={editor}
               shouldShow={({ editor }) => editor.isActive('image')}
-              tippyOptions={{ duration: 100, placement: 'top' }}
+              tippyOptions={{ duration: 100, placement: 'top', interactive: true, hideOnClick: false }}
               className="bg-slate-900 text-white rounded-xl shadow-2xl p-2.5 flex flex-col gap-2 border border-slate-700 text-xs z-50 no-print"
             >
               {/* Row 1: Text Wrapping & Alignment */}
