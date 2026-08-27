@@ -595,13 +595,57 @@ export default function Ribbon({
                 <span>— Horizontal Line</span>
               </button>
 
-              <button
-                onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-                className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
-              >
-                <Table className="w-4 h-4 text-indigo-600" />
-                <span>Insert Table</span>
-              </button>
+              {/* Table Management Tools */}
+              <div className="flex items-center gap-1 bg-indigo-50/90 border border-indigo-200 p-1 rounded-lg">
+                <button
+                  onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs transition-colors"
+                >
+                  <Table className="w-4 h-4 text-indigo-100" />
+                  <span>Table (3x3)</span>
+                </button>
+
+                {editor.isActive('table') && (
+                  <>
+                    <div className="w-[1px] h-4 bg-indigo-300 mx-0.5"></div>
+                    <button
+                      onClick={() => editor.chain().focus().addRowAfter().run()}
+                      className="bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-900 px-2 py-0.5 rounded text-xs font-medium transition-colors"
+                      title="Add Row Below"
+                    >
+                      + Row
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().addColumnAfter().run()}
+                      className="bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-900 px-2 py-0.5 rounded text-xs font-medium transition-colors"
+                      title="Add Column Right"
+                    >
+                      + Col
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().deleteRow().run()}
+                      className="bg-white hover:bg-red-100 border border-red-200 text-red-700 px-2 py-0.5 rounded text-xs font-medium transition-colors"
+                      title="Delete Current Row"
+                    >
+                      - Row
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().deleteColumn().run()}
+                      className="bg-white hover:bg-red-100 border border-red-200 text-red-700 px-2 py-0.5 rounded text-xs font-medium transition-colors"
+                      title="Delete Current Column"
+                    >
+                      - Col
+                    </button>
+                    <button
+                      onClick={() => editor.chain().focus().deleteTable().run()}
+                      className="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded text-xs font-bold transition-colors"
+                      title="Delete Entire Table"
+                    >
+                      Delete Table
+                    </button>
+                  </>
+                )}
+              </div>
 
               <div className="flex items-center gap-1.5 bg-white border border-gray-300 px-2 py-1 rounded shadow-sm">
                 <Stamp className="w-4 h-4 text-red-500" />

@@ -181,10 +181,60 @@ export default function A4EditorCanvas({
             </div>
           )}
 
+          {/* Floating Table Action Bar (Visible when cursor is inside a Table cell) */}
+          {editor && (
+            <BubbleMenu
+              editor={editor}
+              shouldShow={({ editor }) => editor.isActive('table')}
+              tippyOptions={{ duration: 100, placement: 'top' }}
+              className="bg-slate-900 text-white rounded-lg shadow-2xl px-2.5 py-1.5 flex items-center gap-1.5 border border-slate-700 text-xs z-50 no-print"
+            >
+              <span className="text-[11px] font-bold text-amber-400 border-r border-slate-700 pr-1.5">Table Tools:</span>
+              <button
+                onClick={() => editor.chain().focus().addRowAfter().run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-emerald-900 text-emerald-300 rounded font-semibold text-[11px] transition-colors"
+                title="Add Row Below"
+              >
+                + Row
+              </button>
+              <button
+                onClick={() => editor.chain().focus().addColumnAfter().run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-blue-900 text-blue-300 rounded font-semibold text-[11px] transition-colors"
+                title="Add Column Right"
+              >
+                + Col
+              </button>
+              <div className="w-[1px] h-3.5 bg-slate-700"></div>
+              <button
+                onClick={() => editor.chain().focus().deleteRow().run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-red-950 text-red-300 rounded font-semibold text-[11px] transition-colors"
+                title="Delete Current Row"
+              >
+                - Row
+              </button>
+              <button
+                onClick={() => editor.chain().focus().deleteColumn().run()}
+                className="px-2 py-0.5 bg-slate-800 hover:bg-red-950 text-red-300 rounded font-semibold text-[11px] transition-colors"
+                title="Delete Current Column"
+              >
+                - Col
+              </button>
+              <div className="w-[1px] h-3.5 bg-slate-700"></div>
+              <button
+                onClick={() => editor.chain().focus().deleteTable().run()}
+                className="px-2 py-0.5 bg-red-700 hover:bg-red-800 text-white rounded font-bold text-[11px] transition-colors"
+                title="Delete Entire Table"
+              >
+                Delete Table
+              </button>
+            </BubbleMenu>
+          )}
+
           {/* Floating Bubble Formatting Toolbar */}
           {editor && (
             <BubbleMenu 
               editor={editor} 
+              shouldShow={({ editor }) => !editor.isActive('table') && !editor.state.selection.empty}
               tippyOptions={{ duration: 100 }}
               className="bg-gray-900 text-white rounded-lg shadow-xl px-2 py-1 flex items-center gap-1 border border-gray-700 text-xs z-50"
             >
