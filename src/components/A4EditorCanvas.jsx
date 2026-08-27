@@ -18,6 +18,12 @@ import { FontSize } from '../extensions/FontSize';
 import { Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 const CustomImage = Image.extend({
+  inline() {
+    return true;
+  },
+  group() {
+    return 'inline';
+  },
   addAttributes() {
     return {
       ...this.parent?.(),
@@ -31,7 +37,7 @@ const CustomImage = Image.extend({
         default: null,
       },
       width: {
-        default: '50%',
+        default: '40%',
         renderHTML: (attributes) => {
           if (!attributes.width) return {};
           return {
@@ -39,17 +45,17 @@ const CustomImage = Image.extend({
             style: `width: ${attributes.width}; max-width: 100%; height: auto;`,
           };
         },
-        parseHTML: (element) => element.getAttribute('width') || element.style.width || '50%',
+        parseHTML: (element) => element.getAttribute('width') || element.style.width || '40%',
       },
       class: {
-        default: 'align-center',
+        default: 'align-left',
         renderHTML: (attributes) => {
           if (!attributes.class) return {};
           return {
             class: attributes.class,
           };
         },
-        parseHTML: (element) => element.getAttribute('class') || 'align-center',
+        parseHTML: (element) => element.getAttribute('class') || 'align-left',
       },
       style: {
         default: null,

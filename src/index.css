@@ -262,12 +262,18 @@
 }
 
 /* Image Resizing & Text Wrapping Rules */
+.ProseMirror p {
+  position: relative;
+  line-height: 1.6;
+}
+
 .ProseMirror img {
   display: inline-block;
   max-width: 100%;
   height: auto;
   border-radius: 4px;
   transition: outline 0.15s ease-in-out;
+  vertical-align: middle;
 }
 
 .ProseMirror img.ProseMirror-selectednode {
@@ -278,17 +284,19 @@
 .ProseMirror img.align-left,
 .ProseMirror img[data-align="left"] {
   float: left !important;
-  margin-right: 1.25rem !important;
+  margin-right: 1.5rem !important;
   margin-bottom: 0.75rem !important;
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
+  clear: none !important;
 }
 
 .ProseMirror img.align-right,
 .ProseMirror img[data-align="right"] {
   float: right !important;
-  margin-left: 1.25rem !important;
+  margin-left: 1.5rem !important;
   margin-bottom: 0.75rem !important;
-  margin-top: 0.5rem !important;
+  margin-top: 0.25rem !important;
+  clear: none !important;
 }
 
 .ProseMirror img.align-center,
@@ -299,6 +307,7 @@
   float: none !important;
   margin-top: 0.75rem !important;
   margin-bottom: 0.75rem !important;
+  clear: both !important;
 }
 
 /* Print Styles */
