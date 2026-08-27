@@ -25,7 +25,7 @@ export default function HeaderBar({
   const [isEditingTitle, setIsEditingTitle] = useState(false);
 
   return (
-    <header className="bg-[#106ebe] text-white flex items-center justify-between px-2 sm:px-4 py-2 border-b border-blue-800 select-none shadow-sm z-30 flex-wrap gap-2">
+    <header className="bg-[#106ebe] text-white flex items-center justify-between px-2 sm:px-4 py-2 border-b border-blue-800 select-none shadow-sm z-30 flex-wrap gap-2 no-print">
       {/* Left section: App Icon & Title */}
       <div className="flex items-center space-x-2 sm:space-x-3 max-w-[50%] sm:max-w-none">
         <div className="bg-white text-[#106ebe] p-1 sm:p-1.5 rounded flex items-center justify-center font-bold shadow-sm shrink-0">

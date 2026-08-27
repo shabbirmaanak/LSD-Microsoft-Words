@@ -10,7 +10,7 @@ export default function StatusBar({
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
   return (
-    <footer className="bg-[#f3f2f1] border-t border-gray-300 px-2 sm:px-4 py-1 flex items-center justify-between text-xs text-gray-600 select-none z-30 shadow-xs text-[11px] sm:text-xs">
+    <footer className="bg-[#f3f2f1] border-t border-gray-300 px-2 sm:px-4 py-1 flex items-center justify-between text-xs text-gray-600 select-none z-30 shadow-xs text-[11px] sm:text-xs no-print">
       
       {/* Left section: Page info & Word metrics */}
       <div className="flex items-center space-x-2 sm:space-x-4">

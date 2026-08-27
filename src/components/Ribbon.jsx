@@ -50,7 +50,7 @@ export default function Ribbon({
   ];
 
   return (
-    <div className="select-none z-20" dir="ltr">
+    <div className="select-none z-20 no-print" dir="ltr">
 
       {/* ==================== 1. MOBILE STACKED TOOLBAR CARD (Visible on Mobile < 768px) ==================== */}
       <div className="block md:hidden bg-white border-b border-gray-300 p-2.5 shadow-xs space-y-2 select-none text-xs">

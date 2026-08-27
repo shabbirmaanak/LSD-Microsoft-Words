@@ -103,6 +103,18 @@ export default function App() {
     }
   }, []);
 
+  // Handle Global Ctrl+P / Cmd+P Print shortcut
+  useEffect(() => {
+    const handlePrintShortcut = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') {
+        e.preventDefault();
+        window.print();
+      }
+    };
+    window.addEventListener('keydown', handlePrintShortcut);
+    return () => window.removeEventListener('keydown', handlePrintShortcut);
+  }, []);
+
   // Save Active Fonts Preference
   const handleSaveActiveFonts = (newList) => {
     setActiveFontValues(newList);
