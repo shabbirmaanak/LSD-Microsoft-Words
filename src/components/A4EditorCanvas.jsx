@@ -17,6 +17,54 @@ import Image from '@tiptap/extension-image';
 import { FontSize } from '../extensions/FontSize';
 import { Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
+const CustomImage = Image.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      src: {
+        default: null,
+      },
+      alt: {
+        default: null,
+      },
+      title: {
+        default: null,
+      },
+      width: {
+        default: '50%',
+        renderHTML: (attributes) => {
+          if (!attributes.width) return {};
+          return {
+            width: attributes.width,
+            style: `width: ${attributes.width}; max-width: 100%; height: auto;`,
+          };
+        },
+        parseHTML: (element) => element.getAttribute('width') || element.style.width || '50%',
+      },
+      class: {
+        default: 'align-center',
+        renderHTML: (attributes) => {
+          if (!attributes.class) return {};
+          return {
+            class: attributes.class,
+          };
+        },
+        parseHTML: (element) => element.getAttribute('class') || 'align-center',
+      },
+      style: {
+        default: null,
+        renderHTML: (attributes) => {
+          if (!attributes.style) return {};
+          return {
+            style: attributes.style,
+          };
+        },
+        parseHTML: (element) => element.getAttribute('style'),
+      },
+    };
+  },
+});
+
 export default function A4EditorCanvas({
   content,
   onContentChange,
@@ -58,7 +106,7 @@ export default function A4EditorCanvas({
       TableRow,
       TableHeader,
       TableCell,
-      Image,
+      CustomImage,
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -236,67 +284,87 @@ export default function A4EditorCanvas({
               editor={editor}
               shouldShow={({ editor }) => editor.isActive('image')}
               tippyOptions={{ duration: 100, placement: 'top' }}
-              className="bg-slate-900 text-white rounded-lg shadow-2xl px-2.5 py-1.5 flex items-center gap-1.5 border border-slate-700 text-xs z-50 no-print flex-wrap"
+              className="bg-slate-900 text-white rounded-xl shadow-2xl p-2.5 flex flex-col gap-2 border border-slate-700 text-xs z-50 no-print"
             >
-              <span className="text-[11px] font-bold text-amber-400 border-r border-slate-700 pr-1.5">Image:</span>
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-left' }).run()}
-                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded font-semibold text-[11px] transition-colors"
-                title="Wrap Text Right (Float Left)"
-              >
-                Wrap Left
-              </button>
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-center' }).run()}
-                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded font-semibold text-[11px] transition-colors"
-                title="Center Inline"
-              >
-                Center
-              </button>
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-right' }).run()}
-                className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-blue-300 rounded font-semibold text-[11px] transition-colors"
-                title="Wrap Text Left (Float Right)"
-              >
-                Wrap Right
-              </button>
+              {/* Row 1: Text Wrapping & Alignment */}
+              <div className="flex items-center gap-1.5 border-b border-slate-800 pb-2">
+                <span className="text-[11px] font-bold text-amber-400 border-r border-slate-700 pr-1.5">Alignment:</span>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-left' }).run()}
+                  className={`px-2 py-0.5 rounded font-semibold text-[11px] transition-colors ${
+                    editor.getAttributes('image').class === 'align-left' ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-blue-300'
+                  }`}
+                  title="Wrap Text Right (Float Left)"
+                >
+                  Wrap Left
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-center' }).run()}
+                  className={`px-2 py-0.5 rounded font-semibold text-[11px] transition-colors ${
+                    editor.getAttributes('image').class === 'align-center' || !editor.getAttributes('image').class ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-blue-300'
+                  }`}
+                  title="Center Inline"
+                >
+                  Center
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().updateAttributes('image', { class: 'align-right' }).run()}
+                  className={`px-2 py-0.5 rounded font-semibold text-[11px] transition-colors ${
+                    editor.getAttributes('image').class === 'align-right' ? 'bg-blue-600 text-white' : 'bg-slate-800 hover:bg-slate-700 text-blue-300'
+                  }`}
+                  title="Wrap Text Left (Float Right)"
+                >
+                  Wrap Right
+                </button>
 
-              <div className="w-[1px] h-3.5 bg-slate-700"></div>
+                <div className="w-[1px] h-3.5 bg-slate-700 mx-1"></div>
 
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 25%' }).run()}
-                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
-              >
-                25%
-              </button>
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 50%' }).run()}
-                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
-              >
-                50%
-              </button>
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 75%' }).run()}
-                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
-              >
-                75%
-              </button>
-              <button
-                onClick={() => editor.chain().focus().updateAttributes('image', { style: 'width: 100%' }).run()}
-                className="px-1.5 py-0.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded text-[11px]"
-              >
-                100%
-              </button>
+                <button
+                  onClick={() => editor.chain().focus().deleteSelection().run()}
+                  className="px-2 py-0.5 bg-red-700 hover:bg-red-800 text-white rounded font-bold text-[11px] transition-colors"
+                  title="Delete Image"
+                >
+                  Delete
+                </button>
+              </div>
 
-              <div className="w-[1px] h-3.5 bg-slate-700"></div>
+              {/* Row 2: Live Smooth Width Range Slider & Width Presets */}
+              <div className="flex items-center gap-2 pt-0.5">
+                <span className="text-[11px] font-bold text-slate-400">Width:</span>
+                <input
+                  type="range"
+                  min="10"
+                  max="100"
+                  step="5"
+                  value={parseInt(editor.getAttributes('image').width || '50', 10)}
+                  onChange={(e) => {
+                    const newWidth = e.target.value + '%';
+                    editor.chain().focus().updateAttributes('image', { 
+                      width: newWidth,
+                      style: `width: ${newWidth}; max-width: 100%; height: auto;`
+                    }).run();
+                  }}
+                  className="w-24 accent-blue-500 cursor-pointer"
+                />
+                <span className="text-[11px] font-mono text-amber-300 w-10">{editor.getAttributes('image').width || '50%'}</span>
 
-              <button
-                onClick={() => editor.chain().focus().deleteSelection().run()}
-                className="px-2 py-0.5 bg-red-700 hover:bg-red-800 text-white rounded font-bold text-[11px] transition-colors"
-                title="Delete Image"
-              >
-                Delete
-              </button>
+                <div className="flex items-center gap-1 border-l border-slate-700 pl-2">
+                  {['25%', '50%', '75%', '100%'].map((val) => (
+                    <button
+                      key={val}
+                      onClick={() => editor.chain().focus().updateAttributes('image', { 
+                        width: val,
+                        style: `width: ${val}; max-width: 100%; height: auto;`
+                      }).run()}
+                      className={`px-1.5 py-0.5 rounded text-[10px] font-semibold transition-colors ${
+                        editor.getAttributes('image').width === val ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                      }`}
+                    >
+                      {val}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </BubbleMenu>
           )}
 
