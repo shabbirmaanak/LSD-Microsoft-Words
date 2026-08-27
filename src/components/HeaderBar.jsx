@@ -18,6 +18,7 @@ export default function HeaderBar({
   onOpenSavedModal,
   onOpenTemplateModal,
   onExportPDF,
+  onExportDOCX,
   onPrint,
   onToggleHelperDrawer,
   isHelperOpen
@@ -107,6 +108,15 @@ export default function HeaderBar({
         </button>
 
         <div className="h-4 w-[1px] bg-blue-500/50 mx-0.5 sm:mx-1"></div>
+
+        <button
+          onClick={onExportDOCX}
+          className="flex items-center gap-1 bg-white text-[#106ebe] hover:bg-blue-50 px-2 py-1 rounded text-xs font-bold shadow-xs transition-colors"
+          title="Download as Microsoft Word (.docx)"
+        >
+          <FileText className="w-3.5 h-3.5 text-[#106ebe]" />
+          <span>.DOCX</span>
+        </button>
 
         <button
           onClick={onSave}

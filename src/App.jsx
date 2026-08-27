@@ -355,6 +355,52 @@ export default function App() {
     editorInstance.chain().focus().insertContent(char).run();
   };
 
+  // Export as Native Editable Word Document (.docx)
+  const handleExportDOCX = () => {
+    const paperElement = document.getElementById('letter-paper-canvas');
+    if (!paperElement) return;
+
+    const isLandscape = orientation === 'landscape';
+    const header = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head>
+      <meta charset='utf-8'>
+      <title>${docTitle || 'Document'}</title>
+      <style>
+        @page {
+          size: ${isLandscape ? 'A4 landscape' : 'A4 portrait'};
+          margin: 1in;
+        }
+        body {
+          font-family: Arial, sans-serif;
+          direction: ${textDirection};
+        }
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; }
+        td, th { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+        img { max-width: 100%; height: auto; }
+      </style>
+    </head>
+    <body>`;
+    const footer = `</body></html>`;
+    const html = header + paperElement.innerHTML + footer;
+
+    const blob = new Blob(['\ufeff' + html], {
+      type: 'application/msword'
+    });
+
+    const fileName = docTitle.toLowerCase().endsWith('.docx') || docTitle.toLowerCase().endsWith('.doc')
+      ? docTitle
+      : `${docTitle}.docx`;
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   // Word & Character count calculations
   const wordCount = editorText ? editorText.trim().split(/\s+/).filter(Boolean).length : 0;
   const charCount = editorText ? editorText.length : 0;
@@ -371,6 +417,7 @@ export default function App() {
         onOpenSavedModal={() => setIsSavedModalOpen(true)}
         onOpenTemplateModal={() => setIsTemplateModalOpen(true)}
         onExportPDF={handleExportPDF}
+        onExportDOCX={handleExportDOCX}
         onPrint={handlePrint}
         onToggleHelperDrawer={() => setIsHelperOpen(!isHelperOpen)}
         isHelperOpen={isHelperOpen}
@@ -395,6 +442,7 @@ export default function App() {
         onOpenFontUploadModal={() => setIsFontUploadModalOpen(true)}
         onOpenFontManagerModal={() => setIsFontManagerModalOpen(true)}
         onExportPDF={handleExportPDF}
+        onExportDOCX={handleExportDOCX}
         onPrint={handlePrint}
         onNewLetter={handleNewLetter}
         onInsertDate={handleInsertDate}

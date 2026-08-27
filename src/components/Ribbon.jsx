@@ -27,6 +27,7 @@ export default function Ribbon({
   onOpenFontUploadModal,
   onOpenFontManagerModal,
   onExportPDF,
+  onExportDOCX,
   onPrint,
   onNewLetter,
   onInsertDate,
@@ -317,6 +318,15 @@ export default function Ribbon({
           >
             <Table className="w-3.5 h-3.5 text-indigo-200" />
             <span>Table</span>
+          </button>
+
+          <button
+            onClick={onExportDOCX}
+            className="bg-[#106ebe] hover:bg-blue-800 text-white px-2 py-1 rounded text-[11px] font-bold flex items-center gap-1 shadow-xs"
+            title="Download as Word Document (.docx)"
+          >
+            <FileText className="w-3.5 h-3.5 text-blue-200" />
+            <span>.DOCX</span>
           </button>
 
           <button
@@ -797,6 +807,15 @@ export default function Ribbon({
               >
                 <Plus className="w-4 h-4 text-green-600" />
                 <span>New Letter</span>
+              </button>
+
+              <button
+                onClick={onExportDOCX}
+                className="flex items-center gap-1.5 bg-[#106ebe] hover:bg-blue-800 text-white px-3.5 py-1.5 rounded font-bold shadow-sm transition-colors"
+                title="Download as Editable Microsoft Word Document (.docx)"
+              >
+                <FileText className="w-4 h-4 text-blue-200" />
+                <span>Download as Word (.docx)</span>
               </button>
 
               <button
