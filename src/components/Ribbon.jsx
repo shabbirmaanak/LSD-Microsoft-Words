@@ -62,13 +62,14 @@ export default function Ribbon({
               const val = e.target.value;
               if (val === '__manage__') {
                 onOpenFontManagerModal();
-              } else {
+              } else if (val) {
                 editor.chain().focus().setFontFamily(val).run();
               }
             }}
             className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs font-semibold text-gray-900 flex-1 min-w-[110px]"
-            defaultValue={visibleFonts[0]?.value || 'Calibri, sans-serif'}
+            value={editor.getAttributes('textStyle').fontFamily || ''}
           >
+            <option value="" disabled>Select Font</option>
             {visibleFonts.map((f) => (
               <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
                 {f.name}
@@ -353,13 +354,14 @@ export default function Ribbon({
                     const val = e.target.value;
                     if (val === '__manage__') {
                       onOpenFontManagerModal();
-                    } else {
+                    } else if (val) {
                       editor.chain().focus().setFontFamily(val).run();
                     }
                   }}
                   className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600 font-semibold text-gray-900 min-w-[160px]"
-                  defaultValue={visibleFonts[0]?.value || 'Calibri, sans-serif'}
+                  value={editor.getAttributes('textStyle').fontFamily || ''}
                 >
+                  <option value="" disabled>Select Font</option>
                   {visibleFonts.map((f) => (
                     <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
                       {f.name}
