@@ -15,6 +15,7 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import Image from '@tiptap/extension-image';
 import { Extension, textInputRule } from '@tiptap/core';
+import { FontSize } from '../extensions/FontSize';
 
 const LsdKeyMappings = Extension.create({
   name: 'lsdKeyMappings',

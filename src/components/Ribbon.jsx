@@ -103,6 +103,8 @@ export default function Ribbon({
         
         {/* Undo / Redo */}
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
           className="p-1.5 hover:bg-black/10 rounded-full disabled:opacity-30 transition-colors text-gray-700"
@@ -111,6 +113,8 @@ export default function Ribbon({
           <Undo2 className="w-4 h-4" />
         </button>
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().redo().run()}
           disabled={!editor.can().redo()}
           className="p-1.5 hover:bg-black/10 rounded-full disabled:opacity-30 transition-colors text-gray-700"
@@ -121,6 +125,8 @@ export default function Ribbon({
 
         {/* Print */}
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onPrint}
           className="p-1.5 hover:bg-black/10 rounded-full transition-colors text-gray-700"
           title="Print (Ctrl+P)"
@@ -157,6 +163,7 @@ export default function Ribbon({
         {/* LSD Font Family Selector (Strictly LSD Fonts Only) */}
         <div className="flex items-center">
           <select
+            value={editor.getAttributes('textStyle').fontFamily || ''}
             onChange={(e) => {
               const val = e.target.value;
               editor.chain().focus().setFontFamily(val).run();
@@ -164,6 +171,7 @@ export default function Ribbon({
             className="bg-transparent hover:bg-black/5 text-gray-900 font-semibold px-2 py-1 rounded cursor-pointer focus:outline-none text-xs max-w-[170px] border border-transparent hover:border-gray-300"
             title="Lisan al Dawat Typography Fonts"
           >
+            <option value="" disabled>Choose Font</option>
             {visibleFonts.map((font) => (
               <option key={font.value} value={font.value}>
                 {font.name}
@@ -177,6 +185,8 @@ export default function Ribbon({
         {/* Font Size with Stepper (- / +) */}
         <div className="flex items-center bg-white/70 rounded-md border border-gray-300 px-1 py-0.5">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => changeFontSize(-1)}
             className="p-1 hover:bg-gray-200 rounded text-gray-700"
             title="Decrease font size (Ctrl+Shift+,)"
@@ -197,6 +207,8 @@ export default function Ribbon({
             ))}
           </select>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => changeFontSize(1)}
             className="p-1 hover:bg-gray-200 rounded text-gray-700"
             title="Increase font size (Ctrl+Shift+.)"
@@ -210,6 +222,8 @@ export default function Ribbon({
         {/* Bold, Italic, Underline, Strike */}
         <div className="flex items-center gap-0.5">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleBold().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('bold') ? 'bg-[#d3e3fd] text-[#041e49] font-bold' : 'hover:bg-black/10 text-gray-700'}`}
             title="Bold (Ctrl+B)"
@@ -217,6 +231,8 @@ export default function Ribbon({
             <Bold className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleItalic().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('italic') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Italic (Ctrl+I)"
@@ -224,6 +240,8 @@ export default function Ribbon({
             <Italic className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleUnderline().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('underline') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Underline (Ctrl+U)"
@@ -231,6 +249,8 @@ export default function Ribbon({
             <Underline className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleStrike().run()}
             className={`p-1.5 rounded transition-colors ${editor.isActive('strike') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Strikethrough"
@@ -242,6 +262,8 @@ export default function Ribbon({
         {/* Text Color Popover */}
         <div ref={colorPickerRef} className="relative">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setShowColorPicker(!showColorPicker)}
             className="p-1.5 hover:bg-black/10 rounded flex items-center gap-0.5 text-gray-700"
             title="Text color"
@@ -258,6 +280,8 @@ export default function Ribbon({
               {colorSwatches.map((color) => (
                 <button
                   key={color}
+                  type="button"
+                  onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
                     editor.chain().focus().setColor(color).run();
                     setShowColorPicker(false);
@@ -274,6 +298,8 @@ export default function Ribbon({
         {/* Highlight Color Popover */}
         <div ref={highlightPickerRef} className="relative">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setShowHighlightPicker(!showHighlightPicker)}
             className={`p-1.5 rounded flex items-center gap-0.5 transition-colors ${
               editor.isActive('highlight') ? 'bg-amber-200 text-amber-950 font-bold' : 'hover:bg-black/10 text-gray-700'
@@ -291,6 +317,8 @@ export default function Ribbon({
                 {highlightSwatches.map((item) => (
                   <button
                     key={item.color}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
                     onClick={() => {
                       editor.chain().focus().setHighlight({ color: item.color }).run();
                       setShowHighlightPicker(false);
@@ -302,6 +330,8 @@ export default function Ribbon({
                 ))}
               </div>
               <button
+                type="button"
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
                   editor.chain().focus().unsetHighlight().run();
                   setShowHighlightPicker(false);
@@ -318,6 +348,8 @@ export default function Ribbon({
 
         {/* Table & Bismillah Header Shortcuts */}
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
           className="p-1.5 hover:bg-black/10 rounded transition-colors text-gray-700 flex items-center gap-1"
           title="Insert Table (3 × 3)"
@@ -326,6 +358,8 @@ export default function Ribbon({
         </button>
 
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => onInsertBlock?.('bismillah')}
           className="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-950 font-bold rounded-full transition-colors flex items-center gap-1 text-[11px]"
           title="Insert Bismillah Calligraphy Header"
@@ -339,6 +373,8 @@ export default function Ribbon({
         {/* Text Alignment */}
         <div className="flex items-center gap-0.5">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign('left').run()}
             className={`p-1.5 rounded ${editor.isActive({ textAlign: 'left' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Align left"
@@ -346,6 +382,8 @@ export default function Ribbon({
             <AlignLeft className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign('center').run()}
             className={`p-1.5 rounded ${editor.isActive({ textAlign: 'center' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Align center"
@@ -353,6 +391,8 @@ export default function Ribbon({
             <AlignCenter className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign('right').run()}
             className={`p-1.5 rounded ${editor.isActive({ textAlign: 'right' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Align right"
@@ -360,6 +400,8 @@ export default function Ribbon({
             <AlignRight className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().setTextAlign('justify').run()}
             className={`p-1.5 rounded ${editor.isActive({ textAlign: 'justify' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Justify"
@@ -373,6 +415,8 @@ export default function Ribbon({
         {/* Text Direction (LTR / RTL) */}
         <div className="flex items-center bg-white/70 p-0.5 rounded border border-gray-300">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setTextDirection('ltr')}
             className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
               textDirection === 'ltr' ? 'bg-[#4285F4] text-white shadow-2xs' : 'text-gray-600 hover:text-gray-900'
@@ -382,6 +426,8 @@ export default function Ribbon({
             &gt;&para; LTR
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setTextDirection('rtl')}
             className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
               textDirection === 'rtl' ? 'bg-[#046a38] text-white shadow-2xs' : 'text-gray-600 hover:text-gray-900'
@@ -397,6 +443,8 @@ export default function Ribbon({
         {/* Bullet List & Numbered List */}
         <div className="flex items-center gap-0.5">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleBulletList().run()}
             className={`p-1.5 rounded ${editor.isActive('bulletList') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Bulleted list"
@@ -404,6 +452,8 @@ export default function Ribbon({
             <List className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().toggleOrderedList().run()}
             className={`p-1.5 rounded ${editor.isActive('orderedList') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
             title="Numbered list"
@@ -415,6 +465,8 @@ export default function Ribbon({
         {/* Indent / Outdent */}
         <div className="flex items-center gap-0.5">
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().liftListItem('listItem').run()}
             className="p-1.5 hover:bg-black/10 rounded text-gray-700"
             title="Decrease indent"
@@ -422,6 +474,8 @@ export default function Ribbon({
             <Outdent className="w-4 h-4" />
           </button>
           <button
+            type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
             className="p-1.5 hover:bg-black/10 rounded text-gray-700"
             title="Increase indent"
@@ -436,6 +490,7 @@ export default function Ribbon({
         <div ref={watermarkPopoverRef} className="relative">
           <button
             type="button"
+            onMouseDown={(e) => e.preventDefault()}
             onClick={() => setShowWatermarkPopover(!showWatermarkPopover)}
             className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
               watermark ? 'bg-red-100 text-red-900 border border-red-300 font-bold' : 'hover:bg-black/10 text-gray-700'
@@ -504,6 +559,7 @@ export default function Ribbon({
                 {['DRAFT', 'CONFIDENTIAL', 'URGENT', 'مسودة', 'سري للغاية'].map((val) => (
                   <button
                     key={val}
+                    type="button"
                     onClick={() => {
                       setWatermark(val);
                       setCustomWatermarkInput(val);
@@ -521,6 +577,8 @@ export default function Ribbon({
 
         {/* Arabic Keyboard Toggle */}
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={onToggleArabicKeyboard}
           className="p-1.5 hover:bg-black/10 rounded transition-colors text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2 border border-emerald-300 font-bold"
           title="Toggle Lisan al Dawat Virtual Keyboard"
@@ -531,6 +589,8 @@ export default function Ribbon({
 
         {/* Clear Formatting */}
         <button
+          type="button"
+          onMouseDown={(e) => e.preventDefault()}
           onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
           className="p-1.5 hover:bg-black/10 rounded text-gray-700"
           title="Clear formatting (Ctrl+\)"
