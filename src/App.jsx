@@ -23,7 +23,18 @@ export default function App() {
   const [editorInstance, setEditorInstance] = useState(null);
 
   // Custom Templates & Admin Panel State
-  const [customTemplates, setCustomTemplates] = useState(letterTemplates);
+  const [customTemplates, setCustomTemplates] = useState(() => {
+    try {
+      const stored = localStorage.getItem('word_letters_custom_templates');
+      if (stored !== null) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (e) {
+      console.warn('Failed to initialize custom templates', e);
+    }
+    return letterTemplates;
+  });
   const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Layout & Language Settings
@@ -70,9 +81,9 @@ export default function App() {
     // 1. Load Custom Published Templates
     try {
       const storedTpls = localStorage.getItem('word_letters_custom_templates');
-      if (storedTpls) {
+      if (storedTpls !== null) {
         const parsed = JSON.parse(storedTpls);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           setCustomTemplates(parsed);
         }
       }
@@ -561,6 +572,14 @@ export default function App() {
             localStorage.setItem('word_letters_custom_templates', JSON.stringify(newTpls));
           } catch (e) {
             console.warn('Failed to save templates', e);
+          }
+        }}
+        onResetDefaultTemplates={() => {
+          setCustomTemplates(letterTemplates);
+          try {
+            localStorage.setItem('word_letters_custom_templates', JSON.stringify(letterTemplates));
+          } catch (e) {
+            console.warn('Failed to reset templates', e);
           }
         }}
         customFonts={customFonts}
