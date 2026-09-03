@@ -341,7 +341,17 @@ export default function App() {
     try {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
-      const html = result.value;
+      let html = result.value;
+
+      // Auto-detect if content contains Arabic / Lisan al Dawat / Urdu / Persian characters
+      const hasRTLChars = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(html);
+
+      if (hasRTLChars) {
+        setTextDirection('rtl');
+        html = html.replace(/<table(?![^>]*dir=)/gi, '<table dir="rtl"');
+      } else {
+        setTextDirection('ltr');
+      }
 
       const cleanTitle = file.name.toLowerCase().endsWith('.docx')
         ? file.name

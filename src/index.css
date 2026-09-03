@@ -95,9 +95,25 @@
 }
 
 /* RTL Specific Page Formatting */
-.rtl-editor .ProseMirror {
-  direction: rtl;
+.rtl-editor .ProseMirror,
+.rtl-editor #letter-paper-canvas,
+.rtl-editor .ProseMirror table,
+.rtl-editor table,
+[dir="rtl"] .ProseMirror,
+[dir="rtl"] table,
+table[dir="rtl"] {
+  direction: rtl !important;
   text-align: right;
+}
+
+.rtl-editor .ProseMirror th,
+.rtl-editor .ProseMirror td,
+[dir="rtl"] .ProseMirror th,
+[dir="rtl"] .ProseMirror td,
+table[dir="rtl"] th,
+table[dir="rtl"] td {
+  text-align: right;
+  direction: rtl !important;
 }
 
 .ltr-editor .ProseMirror {

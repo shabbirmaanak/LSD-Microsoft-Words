@@ -99,7 +99,13 @@ export default function AdminCMSModal({
     try {
       const arrayBuffer = await file.arrayBuffer();
       const result = await mammoth.convertToHtml({ arrayBuffer });
-      const extractedHtml = result.value;
+      let extractedHtml = result.value;
+
+      const isRTL = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(extractedHtml);
+      if (isRTL) {
+        extractedHtml = extractedHtml.replace(/<table(?![^>]*dir=)/gi, '<table dir="rtl"');
+        setNewTplCategory('Lisan al Dawat');
+      }
 
       const rawTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
       const cleanTitle = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
