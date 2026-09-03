@@ -39,6 +39,7 @@ export default function Ribbon({
 }) {
   const [activeTab, setActiveTab] = useState('home');
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showHighlightPicker, setShowHighlightPicker] = useState(false);
 
   if (!editor) return null;
 
@@ -51,6 +52,14 @@ export default function Ribbon({
   const colorSwatches = [
     '#000000', '#106ebe', '#046a38', '#d13438', '#b4009e', 
     '#323130', '#605e5c', '#0078d4', '#107c41', '#8a001a'
+  ];
+
+  const highlightSwatches = [
+    { name: 'Yellow', color: '#fff59d' },
+    { name: 'Green', color: '#c8e6c9' },
+    { name: 'Cyan', color: '#b3e5fc' },
+    { name: 'Pink', color: '#f8bbd0' },
+    { name: 'Orange', color: '#ffe0b2' },
   ];
 
   return (
@@ -187,6 +196,53 @@ export default function Ribbon({
                       style={{ backgroundColor: color }}
                     />
                   ))}
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => {
+                  if (editor.isActive('highlight')) {
+                    editor.chain().focus().unsetHighlight().run();
+                  } else {
+                    setShowHighlightPicker(!showHighlightPicker);
+                  }
+                }}
+                className={`p-1.5 rounded text-xs transition-colors ${
+                  editor.isActive('highlight') ? 'bg-amber-200 text-amber-950 font-bold border border-amber-400' : 'hover:bg-gray-100 text-gray-700'
+                }`}
+                title="Highlight Text"
+              >
+                <Highlighter className="w-4 h-4 text-amber-500" />
+              </button>
+
+              {showHighlightPicker && (
+                <div className="absolute top-8 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-2 z-50 flex flex-col gap-1.5 w-36">
+                  <span className="text-[10px] font-bold text-gray-500">Highlight</span>
+                  <div className="flex items-center gap-1.5">
+                    {highlightSwatches.map((item) => (
+                      <button
+                        key={item.color}
+                        onClick={() => {
+                          editor.chain().focus().setHighlight({ color: item.color }).run();
+                          setShowHighlightPicker(false);
+                        }}
+                        className="w-5 h-5 rounded-full border border-gray-400 hover:scale-110 shadow-xs"
+                        style={{ backgroundColor: item.color }}
+                        title={item.name}
+                      />
+                    ))}
+                  </div>
+                  <button
+                    onClick={() => {
+                      editor.chain().focus().unsetHighlight().run();
+                      setShowHighlightPicker(false);
+                    }}
+                    className="text-[10px] text-red-600 hover:bg-red-50 py-0.5 rounded text-left font-medium border-t border-gray-100"
+                  >
+                    Clear Highlight
+                  </button>
                 </div>
               )}
             </div>
@@ -530,6 +586,61 @@ export default function Ribbon({
                         style={{ backgroundColor: color }}
                       />
                     ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Text Highlight Color Tool */}
+              <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3 relative">
+                <button
+                  onClick={() => {
+                    if (editor.isActive('highlight')) {
+                      editor.chain().focus().unsetHighlight().run();
+                    } else {
+                      setShowHighlightPicker(!showHighlightPicker);
+                    }
+                  }}
+                  className={`p-1.5 rounded flex items-center gap-1 transition-colors ${
+                    editor.isActive('highlight') ? 'bg-amber-200 text-amber-950 font-bold border border-amber-400' : 'hover:bg-gray-200 text-gray-700'
+                  }`}
+                  title="Highlight Selected Text (Click to toggle / pick color)"
+                >
+                  <Highlighter className="w-4 h-4 text-amber-500" />
+                </button>
+                <button
+                  onClick={() => setShowHighlightPicker(!showHighlightPicker)}
+                  className="text-[9px] text-gray-500 hover:text-gray-800 p-0.5 hover:bg-gray-200 rounded"
+                  title="Choose Highlight Color"
+                >
+                  ▼
+                </button>
+
+                {showHighlightPicker && (
+                  <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-2.5 z-50 flex flex-col gap-1.5 min-w-[140px]">
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highlight Color</span>
+                    <div className="flex items-center gap-1.5">
+                      {highlightSwatches.map((item) => (
+                        <button
+                          key={item.color}
+                          onClick={() => {
+                            editor.chain().focus().setHighlight({ color: item.color }).run();
+                            setShowHighlightPicker(false);
+                          }}
+                          className="w-5 h-5 rounded-full border border-gray-400 hover:scale-125 transition-transform shadow-xs"
+                          style={{ backgroundColor: item.color }}
+                          title={item.name}
+                        />
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => {
+                        editor.chain().focus().unsetHighlight().run();
+                        setShowHighlightPicker(false);
+                      }}
+                      className="text-[11px] text-red-600 hover:bg-red-50 py-0.5 px-1 rounded text-left font-medium border-t border-gray-100 mt-1"
+                    >
+                      ✕ Clear Highlight
+                    </button>
                   </div>
                 )}
               </div>

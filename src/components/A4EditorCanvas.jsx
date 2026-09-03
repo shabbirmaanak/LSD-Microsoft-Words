@@ -15,7 +15,7 @@ import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import Image from '@tiptap/extension-image';
 import { FontSize } from '../extensions/FontSize';
-import { Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter } from 'lucide-react';
 
 const CustomImage = Image.extend({
   inline() {
@@ -632,6 +632,14 @@ export default function A4EditorCanvas({
                 className={`p-1 hover:bg-gray-800 rounded ${editor.isActive('underline') ? 'text-[#046a38]' : 'text-gray-300'}`}
               >
                 <UnderlineIcon className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().toggleHighlight({ color: '#fff59d' }).run()}
+                className={`p-1 hover:bg-gray-800 rounded ${editor.isActive('highlight') ? 'text-amber-400 font-bold bg-gray-800' : 'text-gray-300'}`}
+                title="Highlight Yellow"
+              >
+                <Highlighter className="w-3.5 h-3.5" />
               </button>
               <div className="w-[1px] h-3 bg-gray-700 mx-1"></div>
               <button
