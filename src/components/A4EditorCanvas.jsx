@@ -71,12 +71,21 @@ const CustomImage = Image.extend({
   },
 });
 
+export const PAGE_CONFIG = {
+  A4: { name: 'A4', width: 794, height: 1123, label: 'A4 (210 × 297 mm)' },
+  Letter: { name: 'Letter', width: 816, height: 1056, label: 'Letter (8.5 × 11 in)' },
+  Legal: { name: 'Legal', width: 816, height: 1344, label: 'Legal (8.5 × 14 in)' },
+  A5: { name: 'A5', width: 559, height: 794, label: 'A5 (148 × 210 mm)' },
+};
+
 export default function A4EditorCanvas({
   content,
   onContentChange,
   watermark,
   margins,
   orientation,
+  pageSize = 'A4',
+  onPageCountChange,
   paperColor,
   textDirection,
   zoomLevel,
@@ -87,6 +96,35 @@ export default function A4EditorCanvas({
     narrow: 'p-8',  // ~0.5 inch
     wide: 'p-24',   // ~1.5 inch
   };
+
+  const selectedPage = PAGE_CONFIG[pageSize] || PAGE_CONFIG.A4;
+  const isLandscape = orientation === 'landscape';
+  const pagePxWidth = isLandscape ? selectedPage.height : selectedPage.width;
+  const pagePxHeight = isLandscape ? selectedPage.width : selectedPage.height;
+
+  const paperRef = React.useRef(null);
+  const [contentHeight, setContentHeight] = React.useState(pagePxHeight);
+
+  React.useEffect(() => {
+    const measure = () => {
+      if (paperRef.current) {
+        const measured = paperRef.current.scrollHeight || paperRef.current.offsetHeight;
+        setContentHeight(Math.max(measured, pagePxHeight));
+      }
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    if (paperRef.current) observer.observe(paperRef.current);
+    return () => observer.disconnect();
+  }, [content, orientation, pageSize, margins, pagePxHeight]);
+
+  const totalPages = Math.max(1, Math.ceil(contentHeight / pagePxHeight));
+
+  React.useEffect(() => {
+    if (typeof onPageCountChange === 'function') {
+      onPageCountChange(totalPages);
+    }
+  }, [totalPages, onPageCountChange]);
 
   const editor = useEditor({
     extensions: [
@@ -301,14 +339,15 @@ export default function A4EditorCanvas({
     };
   }, [editor]);
 
-  const isLandscape = orientation === 'landscape';
-  const maxWidthClass = isLandscape ? 'max-w-[1123px]' : 'max-w-[794px]';
-
   return (
     <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 no-print select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
       
       {/* Top Horizontal Ruler (Hidden on small mobile) */}
-      <div className={`hidden sm:flex ${maxWidthClass} w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm`} dir={textDirection}>
+      <div 
+        className="hidden sm:flex w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm"
+        style={{ maxWidth: `${pagePxWidth}px` }}
+        dir={textDirection}
+      >
         <span>٠</span>
         <span>١</span>
         <span>٢</span>
@@ -320,17 +359,48 @@ export default function A4EditorCanvas({
         <span>٨</span>
       </div>
 
-      {/* A4 Paper Container with Zoom Scaling */}
+      {/* Paper Container with Zoom Scaling */}
       <div 
-        className={`w-full ${maxWidthClass} transition-all origin-top duration-150 ease-out flex justify-center`}
-        style={{ transform: `scale(${zoomLevel / 100})` }}
+        className="w-full transition-all origin-top duration-150 ease-out flex justify-center"
+        style={{ 
+          maxWidth: `${pagePxWidth}px`,
+          transform: `scale(${zoomLevel / 100})` 
+        }}
       >
         <div 
+          ref={paperRef}
           id="letter-paper-canvas"
           dir={textDirection}
-          className={`a4-paper ${isLandscape ? 'a4-landscape' : ''} paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all`}
-          style={{ backgroundColor: paperColor || '#ffffff' }}
+          className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all relative overflow-hidden`}
+          style={{ 
+            width: `${pagePxWidth}px`,
+            minHeight: `${Math.max(1, totalPages) * pagePxHeight}px`,
+            backgroundColor: paperColor || '#ffffff' 
+          }}
         >
+          {/* Visual Multi-Page Separation Breaks */}
+          {totalPages > 1 && Array.from({ length: totalPages - 1 }).map((_, idx) => {
+            const pageNum = idx + 1;
+            const topOffset = pageNum * pagePxHeight;
+            return (
+              <div
+                key={pageNum}
+                className="absolute left-0 right-0 pointer-events-none select-none z-20 no-print flex flex-col items-center"
+                style={{ top: `${topOffset}px` }}
+              >
+                {/* Visual Gap Between Pages */}
+                <div className="w-full h-8 bg-[#e8ecef] border-y border-gray-300 shadow-inner flex items-center justify-between px-6">
+                  <span className="text-[10px] font-bold text-gray-500 font-mono tracking-wider">
+                    ─── End of Page {pageNum} ───
+                  </span>
+                  <span className="text-[10px] font-bold bg-white text-gray-700 px-2.5 py-0.5 rounded-full border border-gray-300 shadow-2xs">
+                    📄 Page {pageNum + 1} of {totalPages} ({pageSize})
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+
           {/* Watermark Overlay */}
           {watermark && (
             <div className="watermark-text">

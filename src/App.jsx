@@ -44,6 +44,8 @@ export default function App() {
   const [watermark, setWatermark] = useState('');
   const [margins, setMargins] = useState('normal');
   const [orientation, setOrientation] = useState('portrait');
+  const [pageSize, setPageSize] = useState('A4');
+  const [totalPages, setTotalPages] = useState(1);
   const [paperColor, setPaperColor] = useState('#ffffff');
   const [zoomLevel, setZoomLevel] = useState(100);
 
@@ -512,6 +514,8 @@ export default function App() {
         setMargins={setMargins}
         orientation={orientation}
         setOrientation={setOrientation}
+        pageSize={pageSize}
+        setPageSize={setPageSize}
         paperColor={paperColor}
         setPaperColor={setPaperColor}
         textDirection={textDirection}
@@ -540,6 +544,8 @@ export default function App() {
           watermark={watermark}
           margins={margins}
           orientation={orientation}
+          pageSize={pageSize}
+          onPageCountChange={setTotalPages}
           paperColor={paperColor}
           textDirection={textDirection}
           zoomLevel={zoomLevel}
@@ -567,6 +573,8 @@ export default function App() {
         charCount={charCount}
         zoomLevel={zoomLevel}
         setZoomLevel={setZoomLevel}
+        totalPages={totalPages}
+        pageSize={pageSize}
       />
 
       {/* Modals */}

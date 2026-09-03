@@ -17,6 +17,8 @@ export default function Ribbon({
   setMargins,
   orientation,
   setOrientation,
+  pageSize = 'A4',
+  setPageSize,
   paperColor,
   setPaperColor,
   textDirection,
@@ -661,6 +663,15 @@ export default function Ribbon({
                 <span>— Horizontal Line</span>
               </button>
 
+              <button
+                onClick={() => editor.chain().focus().insertContent('<div class="page-break" style="page-break-after: always; break-after: page; height: 16px;"></div><p></p>').run()}
+                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow-xs transition-colors"
+                title="Insert Page Break (Force content to next page)"
+              >
+                <FileText className="w-4 h-4 text-blue-100" />
+                <span>Page Break</span>
+              </button>
+
               {/* Table Management Tools */}
               <div className="flex items-center gap-1 bg-indigo-50/90 border border-indigo-200 p-1 rounded-lg">
                 <button
@@ -734,6 +745,20 @@ export default function Ribbon({
           {/* LAYOUT TAB */}
           {activeTab === 'layout' && (
             <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="font-medium text-gray-600">Page Size:</span>
+                <select
+                  value={pageSize}
+                  onChange={(e) => setPageSize(e.target.value)}
+                  className="bg-white border border-gray-300 rounded px-2.5 py-1 font-semibold text-xs text-gray-800 shadow-sm focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                >
+                  <option value="A4">A4 (210 × 297 mm) — Default</option>
+                  <option value="Letter">Letter (8.5 × 11 in)</option>
+                  <option value="Legal">Legal (8.5 × 14 in)</option>
+                  <option value="A5">A5 (148 × 210 mm)</option>
+                </select>
+              </div>
+
               <div className="flex items-center gap-2">
                 <span className="font-medium text-gray-600">Margins:</span>
                 <div className="flex bg-white border border-gray-300 rounded p-0.5 shadow-sm">

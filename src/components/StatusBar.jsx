@@ -5,7 +5,9 @@ export default function StatusBar({
   wordCount,
   charCount,
   zoomLevel,
-  setZoomLevel
+  setZoomLevel,
+  totalPages = 1,
+  pageSize = 'A4'
 }) {
   const readingTime = Math.max(1, Math.ceil(wordCount / 200));
 
@@ -16,7 +18,7 @@ export default function StatusBar({
       <div className="flex items-center space-x-2 sm:space-x-4">
         <div className="flex items-center gap-1 font-medium text-gray-700">
           <FileText className="w-3.5 h-3.5 text-blue-600" />
-          <span className="hidden sm:inline">Page 1 of 1</span>
+          <span className="hidden sm:inline font-semibold">Page 1 of {totalPages} ({pageSize})</span>
         </div>
 
         <div className="h-3 w-[1px] bg-gray-300 hidden sm:block"></div>
