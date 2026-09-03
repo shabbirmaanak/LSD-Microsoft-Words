@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useEditor, EditorContent, BubbleMenu } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import FontFamily from '@tiptap/extension-font-family';
@@ -102,29 +102,32 @@ export default function A4EditorCanvas({
   const pagePxWidth = isLandscape ? selectedPage.height : selectedPage.width;
   const pagePxHeight = isLandscape ? selectedPage.width : selectedPage.height;
 
-  const paperRef = React.useRef(null);
-  const [contentHeight, setContentHeight] = React.useState(pagePxHeight);
+  const paperRef = useRef(null);
+  const [totalPages, setTotalPages] = useState(1);
 
-  React.useEffect(() => {
-    const measure = () => {
-      if (paperRef.current) {
-        const measured = paperRef.current.scrollHeight || paperRef.current.offsetHeight;
-        setContentHeight(Math.max(measured, pagePxHeight));
-      }
+  useEffect(() => {
+    const calculatePages = () => {
+      if (!paperRef.current) return;
+      const editorDom = paperRef.current.querySelector('.ProseMirror');
+      if (!editorDom) return;
+
+      const innerHeight = editorDom.scrollHeight || editorDom.clientHeight || pagePxHeight;
+      const pages = Math.max(1, Math.ceil((innerHeight + 80) / pagePxHeight));
+
+      setTotalPages((prev) => {
+        if (prev !== pages) {
+          if (typeof onPageCountChange === 'function') {
+            onPageCountChange(pages);
+          }
+          return pages;
+        }
+        return prev;
+      });
     };
-    measure();
-    const observer = new ResizeObserver(measure);
-    if (paperRef.current) observer.observe(paperRef.current);
-    return () => observer.disconnect();
-  }, [content, orientation, pageSize, margins, pagePxHeight]);
 
-  const totalPages = Math.max(1, Math.ceil(contentHeight / pagePxHeight));
-
-  React.useEffect(() => {
-    if (typeof onPageCountChange === 'function') {
-      onPageCountChange(totalPages);
-    }
-  }, [totalPages, onPageCountChange]);
+    const timer = setTimeout(calculatePages, 60);
+    return () => clearTimeout(timer);
+  }, [content, orientation, pageSize, margins, pagePxHeight, onPageCountChange]);
 
   const editor = useEditor({
     extensions: [
