@@ -369,11 +369,11 @@ export default function A4EditorCanvas({
   }, [editor]);
 
   return (
-    <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 no-print select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
+    <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
       
-      {/* Top Horizontal Ruler (Hidden on small mobile) */}
+      {/* Top Horizontal Ruler (Hidden on print and mobile) */}
       <div 
-        className="hidden sm:flex w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm"
+        className="hidden sm:flex no-print w-full h-6 bg-white border border-gray-300 mb-2 items-center px-16 text-[10px] text-gray-500 justify-between select-none shadow-xs rounded-t-sm"
         style={{ maxWidth: `${pagePxWidth}px` }}
         dir={textDirection}
       >
