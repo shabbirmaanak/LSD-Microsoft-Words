@@ -14,6 +14,7 @@ import AdminCMSModal from './components/AdminCMSModal';
 import { letterTemplates } from './data/letterTemplates';
 import { preinstalledFonts } from './config/defaultFonts';
 import { subscribeToCloudTemplates, isFirebaseConnected } from './services/firebase';
+import { isTursoConnected, fetchTursoTemplates } from './services/turso';
 
 export default function App() {
   // Document State
@@ -151,6 +152,20 @@ export default function App() {
         }
       }
     });
+
+    // 5. Turso Cloud Edge Database Sync
+    if (isTursoConnected()) {
+      fetchTursoTemplates().then((tursoTpls) => {
+        if (Array.isArray(tursoTpls) && tursoTpls.length > 0) {
+          setCustomTemplates(tursoTpls);
+          try {
+            localStorage.setItem('word_letters_custom_templates', JSON.stringify(tursoTpls));
+          } catch (e) {
+            console.warn('Failed to cache Turso templates', e);
+          }
+        }
+      }).catch(err => console.warn('Failed to load Turso templates on mount', err));
+    }
 
     return () => {
       if (typeof unsubscribeCloud === 'function') {

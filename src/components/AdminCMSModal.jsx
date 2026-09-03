@@ -27,6 +27,19 @@ import {
   saveCloudTemplate,
   deleteCloudTemplate
 } from '../services/firebase';
+import {
+  isTursoConnected,
+  getStoredTursoConfig,
+  saveStoredTursoConfig,
+  testTursoConnection,
+  saveTursoTemplate,
+  deleteTursoTemplate
+} from '../services/turso';
+import {
+  saveToCloudDb,
+  deleteFromCloudDb,
+  getActiveCloudProvider
+} from '../services/cloudSync';
 
 export default function AdminCMSModal({
   isOpen,
@@ -42,6 +55,13 @@ export default function AdminCMSModal({
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState('templates');
+  const [cloudProviderTab, setCloudProviderTab] = useState('turso'); // 'turso' | 'firebase'
+
+  // Turso Cloud Database State
+  const [tursoConnected, setTursoConnected] = useState(isTursoConnected());
+  const [tursoUrl, setTursoUrl] = useState(() => getStoredTursoConfig()?.url || '');
+  const [tursoToken, setTursoToken] = useState(() => getStoredTursoConfig()?.authToken || '');
+  const [isTestingTurso, setIsTestingTurso] = useState(false);
 
   // Firebase Cloud Database Config State
   const [firebaseConnected, setFirebaseConnected] = useState(isFirebaseConnected());
@@ -124,14 +144,12 @@ export default function AdminCMSModal({
     const updated = [newTemplate, ...templates];
     onSaveTemplates(updated);
 
-    // Sync to Cloud Firestore if connected
-    if (isFirebaseConnected()) {
-      try {
-        await saveCloudTemplate(newTemplate);
-        console.log('✅ Template broadcasted to Cloud Firestore!');
-      } catch (cloudErr) {
-        console.warn('Failed to save to cloud:', cloudErr);
-      }
+    // Sync to Cloud Database (Turso SQLite or Firebase)
+    try {
+      await saveToCloudDb(newTemplate);
+      console.log('✅ Template broadcasted to Cloud Database!');
+    } catch (cloudErr) {
+      console.warn('Failed to save to cloud:', cloudErr);
     }
 
     // Reset form
@@ -147,14 +165,36 @@ export default function AdminCMSModal({
       const updated = templates.filter(t => t.id !== id);
       onSaveTemplates(updated);
 
-      if (isFirebaseConnected()) {
-        try {
-          await deleteCloudTemplate(id);
-          console.log('✅ Template deleted from Cloud Firestore');
-        } catch (cloudErr) {
-          console.warn('Failed to delete from cloud:', cloudErr);
-        }
+      try {
+        await deleteFromCloudDb(id);
+        console.log('✅ Template deleted from Cloud Database');
+      } catch (cloudErr) {
+        console.warn('Failed to delete from cloud:', cloudErr);
       }
+    }
+  };
+
+  const handleSaveTursoConfig = async (e) => {
+    e.preventDefault();
+    if (!tursoUrl.trim() || !tursoToken.trim()) {
+      saveStoredTursoConfig(null);
+      setTursoConnected(false);
+      setCloudStatusMsg('Turso Database disconnected.');
+      return;
+    }
+
+    setIsTestingTurso(true);
+    setCloudStatusMsg('');
+    try {
+      await testTursoConnection(tursoUrl, tursoToken);
+      saveStoredTursoConfig({ url: tursoUrl.trim(), authToken: tursoToken.trim() });
+      setTursoConnected(true);
+      setCloudStatusMsg('✅ Connected to Turso SQLite Database successfully! Templates will be stored at the edge and synced to all users globally.');
+    } catch (err) {
+      setTursoConnected(false);
+      alert('Failed to connect to Turso: ' + err.message);
+    } finally {
+      setIsTestingTurso(false);
     }
   };
 
@@ -550,33 +590,40 @@ export default function AdminCMSModal({
                 </div>
               )}
 
-              {/* 3. CLOUD DATABASE (FIREBASE) TAB */}
+              {/* 3. CLOUD DATABASE TAB */}
               {activeTab === 'cloud' && (
                 <div className="space-y-4 text-xs">
                   {/* Status Banner */}
                   <div className={`p-4 rounded-xl border flex items-center justify-between gap-3 ${
-                    firebaseConnected 
+                    (tursoConnected || firebaseConnected)
                       ? 'bg-emerald-50 border-emerald-200 text-emerald-900' 
                       : 'bg-amber-50 border-amber-200 text-amber-900'
                   }`}>
                     <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-lg text-white ${firebaseConnected ? 'bg-emerald-600' : 'bg-amber-600'}`}>
+                      <div className={`p-2.5 rounded-lg text-white ${(tursoConnected || firebaseConnected) ? 'bg-emerald-600' : 'bg-amber-600'}`}>
                         <Database className="w-5 h-5" />
                       </div>
                       <div>
                         <h4 className="font-bold text-sm">
-                          {firebaseConnected ? '🟢 Firebase Firestore Connected & Active' : '⚪ Local Mode (No Cloud DB Connected)'}
+                          {tursoConnected 
+                            ? '🟢 Turso SQLite Edge Database Connected & Active' 
+                            : firebaseConnected 
+                              ? '🟢 Firebase Firestore Connected & Active'
+                              : '⚪ Local Mode (No Cloud DB Connected)'}
                         </h4>
                         <p className="text-[11px] opacity-90 mt-0.5">
-                          {firebaseConnected 
-                            ? 'All templates published in this Admin CMS are automatically synced in real-time to all users worldwide.'
-                            : 'Templates are currently stored on this local device only. Connect Firebase Firestore below to enable global multi-device sync.'}
+                          {(tursoConnected || firebaseConnected)
+                            ? 'All templates published in this Admin CMS are automatically synced to the cloud and available to all users across the world.'
+                            : 'Templates are currently stored on this local device only. Connect Turso or Firebase below to enable global multi-device sync.'}
                         </p>
                       </div>
                     </div>
 
                     <button
-                      onClick={() => setFirebaseConnected(isFirebaseConnected())}
+                      onClick={() => {
+                        setTursoConnected(isTursoConnected());
+                        setFirebaseConnected(isFirebaseConnected());
+                      }}
                       className="bg-white px-3 py-1.5 rounded-lg border shadow-2xs font-bold text-xs hover:bg-gray-50 shrink-0 flex items-center gap-1"
                     >
                       <RefreshCw className="w-3.5 h-3.5" />
@@ -590,71 +637,178 @@ export default function AdminCMSModal({
                     </div>
                   )}
 
-                  {/* Firebase Config Form */}
-                  <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs space-y-4">
-                    <div>
-                      <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-[#106ebe]" />
-                        <span>Firebase Cloud Firestore Credentials</span>
-                      </h4>
-                      <p className="text-gray-500 text-[11px] mt-0.5">
-                        Paste your Firebase Web App configuration JSON below to enable automatic global sync across all phones, tablets, and computers.
-                      </p>
+                  {/* Provider Switcher */}
+                  <div className="flex items-center gap-2 border-b border-gray-200 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => setCloudProviderTab('turso')}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                        cloudProviderTab === 'turso'
+                          ? 'bg-emerald-700 text-white shadow-xs'
+                          : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Database className="w-3.5 h-3.5" />
+                      <span>Turso Database (SQLite)</span>
+                      {tursoConnected && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setCloudProviderTab('firebase')}
+                      className={`px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1.5 ${
+                        cloudProviderTab === 'firebase'
+                          ? 'bg-slate-900 text-white shadow-xs'
+                          : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                      }`}
+                    >
+                      <Cloud className="w-3.5 h-3.5" />
+                      <span>Firebase Firestore</span>
+                      {firebaseConnected && <span className="w-2 h-2 rounded-full bg-emerald-400" />}
+                    </button>
+                  </div>
+
+                  {/* 1. TURSO DATABASE FORM */}
+                  {cloudProviderTab === 'turso' && (
+                    <div className="space-y-4">
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs space-y-4">
+                        <div>
+                          <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                            <Database className="w-4 h-4 text-emerald-600" />
+                            <span>Turso Database Credentials</span>
+                          </h4>
+                          <p className="text-gray-500 text-[11px] mt-0.5">
+                            Enter your Turso Database URL and Auth Token. The templates table will be created automatically.
+                          </p>
+                        </div>
+
+                        <form onSubmit={handleSaveTursoConfig} className="space-y-3">
+                          <div>
+                            <label className="block text-gray-700 font-semibold mb-1">Turso Database URL *</label>
+                            <input
+                              type="text"
+                              value={tursoUrl}
+                              onChange={(e) => setTursoUrl(e.target.value)}
+                              placeholder="e.g. libsql://your-db-name.turso.io or https://..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-xs focus:ring-1 focus:ring-emerald-700"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-gray-700 font-semibold mb-1">Turso Auth Token *</label>
+                            <input
+                              type="text"
+                              value={tursoToken}
+                              onChange={(e) => setTursoToken(e.target.value)}
+                              placeholder="e.g. eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded font-mono text-xs focus:ring-1 focus:ring-emerald-700"
+                              required
+                              style={{ WebkitTextSecurity: 'disc' }}
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="submit"
+                              disabled={isTestingTurso}
+                              className="bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
+                            >
+                              <Database className="w-3.5 h-3.5 text-emerald-200" />
+                              <span>{isTestingTurso ? 'Connecting to Turso...' : 'Connect Turso Database'}</span>
+                            </button>
+
+                            {tursoConnected && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm('Disconnect from Turso database?')) {
+                                    setTursoUrl('');
+                                    setTursoToken('');
+                                    saveStoredTursoConfig(null);
+                                    setTursoConnected(false);
+                                    setCloudStatusMsg('Disconnected from Turso Database.');
+                                  }
+                                }}
+                                className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold text-xs border border-red-200 transition-colors"
+                              >
+                                Disconnect
+                              </button>
+                            )}
+                          </div>
+                        </form>
+                      </div>
+
+                      {/* Turso Quick Guide */}
+                      <div className="bg-emerald-50/60 p-4 rounded-xl border border-emerald-200/80 space-y-2">
+                        <h5 className="font-bold text-xs text-emerald-900 flex items-center gap-1.5">
+                          <HelpCircle className="w-4 h-4 text-emerald-700" />
+                          <span>Where to find your Turso credentials:</span>
+                        </h5>
+                        <ol className="list-decimal list-inside space-y-1 text-[11px] text-emerald-950/80 leading-relaxed">
+                          <li>Run <code>turso db show &lt;database-name&gt; --url</code> (or copy URL from your Turso Dashboard).</li>
+                          <li>Run <code>turso db tokens create &lt;database-name&gt;</code> to generate your auth token.</li>
+                          <li>Paste both above and click <strong>Connect Turso Database</strong>!</li>
+                        </ol>
+                      </div>
                     </div>
+                  )}
 
-                    <form onSubmit={handleSaveFirebaseConfig} className="space-y-3">
-                      <div>
-                        <textarea
-                          rows={7}
-                          value={firebaseConfigText}
-                          onChange={(e) => setFirebaseConfigText(e.target.value)}
-                          placeholder={`{\n  "apiKey": "AIzaSy...",\n  "authDomain": "your-app.firebaseapp.com",\n  "projectId": "your-app-id",\n  "storageBucket": "your-app.appspot.com",\n  "messagingSenderId": "123456789",\n  "appId": "1:123456789:web:abcdef"\n}`}
-                          className="w-full font-mono text-xs p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-slate-900 bg-slate-900 text-emerald-400 placeholder:text-gray-600"
-                        />
+                  {/* 2. FIREBASE FORM */}
+                  {cloudProviderTab === 'firebase' && (
+                    <div className="space-y-4">
+                      <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs space-y-4">
+                        <div>
+                          <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-[#106ebe]" />
+                            <span>Firebase Cloud Firestore Credentials</span>
+                          </h4>
+                          <p className="text-gray-500 text-[11px] mt-0.5">
+                            Paste your Firebase Web App configuration JSON below to enable automatic global sync.
+                          </p>
+                        </div>
+
+                        <form onSubmit={handleSaveFirebaseConfig} className="space-y-3">
+                          <div>
+                            <textarea
+                              rows={6}
+                              value={firebaseConfigText}
+                              onChange={(e) => setFirebaseConfigText(e.target.value)}
+                              placeholder={`{\n  "apiKey": "AIzaSy...",\n  "projectId": "your-app-id"\n}`}
+                              className="w-full font-mono text-xs p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-slate-900 bg-slate-900 text-emerald-400 placeholder:text-gray-600"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="submit"
+                              className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
+                            >
+                              <Cloud className="w-3.5 h-3.5 text-amber-400" />
+                              <span>Save & Connect Firebase</span>
+                            </button>
+
+                            {firebaseConfigText && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (window.confirm('Disconnect from Firebase cloud database?')) {
+                                    setFirebaseConfigText('');
+                                    saveStoredFirebaseConfig(null);
+                                    setFirebaseConnected(false);
+                                    setCloudStatusMsg('Disconnected from Cloud Database.');
+                                  }
+                                }}
+                                className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold text-xs border border-red-200 transition-colors"
+                              >
+                                Disconnect
+                              </button>
+                            )}
+                          </div>
+                        </form>
                       </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="submit"
-                          className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
-                        >
-                          <Cloud className="w-3.5 h-3.5 text-amber-400" />
-                          <span>Save & Connect Firebase</span>
-                        </button>
-
-                        {firebaseConfigText && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (window.confirm('Disconnect from Firebase cloud database?')) {
-                                setFirebaseConfigText('');
-                                saveStoredFirebaseConfig(null);
-                                setFirebaseConnected(false);
-                                setCloudStatusMsg('Disconnected from Cloud Database.');
-                              }
-                            }}
-                            className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold text-xs border border-red-200 transition-colors"
-                          >
-                            Disconnect
-                          </button>
-                        )}
-                      </div>
-                    </form>
-                  </div>
-
-                  {/* Free Setup Instructions */}
-                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
-                    <h5 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
-                      <HelpCircle className="w-4 h-4 text-slate-500" />
-                      <span>How to get your free Firebase config in 60 seconds:</span>
-                    </h5>
-                    <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
-                      <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-blue-600 underline font-semibold">console.firebase.google.com</a> and click <strong>Create a project</strong> (100% Free).</li>
-                      <li>In your project dashboard, click <strong>Build ➔ Firestore Database</strong> and click <strong>Create database</strong> (in Test Mode).</li>
-                      <li>Go to <strong>Project Settings (⚙️) ➔ General ➔ Your apps</strong>, click the <strong>&lt;/&gt; (Web)</strong> icon, and copy the `firebaseConfig` object.</li>
-                      <li>Paste the JSON above and click <strong>Save & Connect Firebase</strong>!</li>
-                    </ol>
-                  </div>
+                    </div>
+                  )}
 
                 </div>
               )}
