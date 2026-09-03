@@ -109,9 +109,16 @@ export default function AdminCMSModal({
 
       const isRTL = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(extractedHtml);
       if (isRTL) {
-        extractedHtml = extractedHtml.replace(/<table(?![^>]*dir=)/gi, '<table dir="rtl"');
+        extractedHtml = extractedHtml.replace(/<table(?![^>]*dir=)/gi, '<table dir="rtl" class="rtl-table" border="1"');
         setNewTplCategory('Lisan al Dawat');
+      } else {
+        extractedHtml = extractedHtml.replace(/<table(?![^>]*dir=)/gi, '<table dir="ltr" border="1"');
       }
+
+      // Ensure all table cells have visible borders and spacing
+      extractedHtml = extractedHtml
+        .replace(/<td(?![^>]*style=)/gi, '<td style="border: 1px solid #64748b; padding: 8px 12px; min-width: 44px;"')
+        .replace(/<th(?![^>]*style=)/gi, '<th style="border: 1px solid #64748b; padding: 8px 12px; background: #f1f5f9; font-weight: bold;"');
 
       const rawTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
       const cleanTitle = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
@@ -511,7 +518,7 @@ export default function AdminCMSModal({
 
                             {/* A4 Paper Sheet Preview Container */}
                             <div 
-                              className="w-full max-w-2xl bg-white shadow-md p-8 sm:p-12 border border-gray-300 rounded-sm font-sans min-h-[360px] max-h-[480px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-400 lisan-dawat-text leading-relaxed text-gray-900"
+                              className="w-full max-w-2xl bg-white shadow-md p-8 sm:p-12 border border-gray-300 rounded-sm font-sans min-h-[360px] max-h-[480px] overflow-y-auto focus:outline-none focus:ring-2 focus:ring-blue-400 lisan-dawat-text leading-relaxed text-gray-900 admin-preview-paper"
                               dir={previewDir}
                               contentEditable={true}
                               suppressContentEditableWarning={true}

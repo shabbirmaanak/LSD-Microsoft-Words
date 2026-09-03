@@ -137,6 +137,54 @@ table[dir="ltr"] td {
   direction: ltr !important;
 }
 
+/* Admin CMS Live Preview A4 Paper & Table Styling */
+.admin-preview-paper {
+  background: #ffffff !important;
+  color: #000000 !important;
+  font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Amiri', 'Segoe UI', Arial, serif;
+}
+
+.admin-preview-paper table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1rem 0 !important;
+  table-layout: auto !important;
+}
+
+.admin-preview-paper[dir="rtl"] table,
+.admin-preview-paper table[dir="rtl"],
+.admin-preview-paper table.rtl-table {
+  direction: rtl !important;
+}
+
+.admin-preview-paper td,
+.admin-preview-paper th {
+  border: 1px solid #64748b !important;
+  padding: 8px 12px !important;
+  min-width: 44px !important;
+  min-height: 30px !important;
+  vertical-align: top !important;
+  word-break: break-word !important;
+}
+
+.admin-preview-paper[dir="rtl"] td,
+.admin-preview-paper[dir="rtl"] th,
+.admin-preview-paper table[dir="rtl"] td,
+.admin-preview-paper table[dir="rtl"] th {
+  text-align: right !important;
+  direction: rtl !important;
+}
+
+.admin-preview-paper th {
+  background-color: #f1f5f9 !important;
+  font-weight: 700 !important;
+}
+
+.admin-preview-paper p {
+  margin: 0.6rem 0 !important;
+  line-height: 1.8 !important;
+}
+
 /* Calligraphy Headers */
 .bismillah-header {
   font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Amiri', serif;
