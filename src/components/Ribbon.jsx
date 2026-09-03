@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Bold, Italic, Underline, Strikethrough, Subscript, Superscript,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
@@ -42,6 +42,29 @@ export default function Ribbon({
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showWatermarkPopover, setShowWatermarkPopover] = useState(false);
   const [customWatermarkInput, setCustomWatermarkInput] = useState(watermark || '');
+
+  const colorPickerRef = useRef(null);
+  const highlightPickerRef = useRef(null);
+  const watermarkPopoverRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (colorPickerRef.current && !colorPickerRef.current.contains(e.target)) {
+        setShowColorPicker(false);
+      }
+      if (highlightPickerRef.current && !highlightPickerRef.current.contains(e.target)) {
+        setShowHighlightPicker(false);
+      }
+      if (watermarkPopoverRef.current && !watermarkPopoverRef.current.contains(e.target)) {
+        setShowWatermarkPopover(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   if (!editor) return null;
 
@@ -438,14 +461,6 @@ export default function Ribbon({
           </div>
         </div>
 
-        {/* Global Click-Away Dismiss for Dropdowns */}
-        {(showColorPicker || showHighlightPicker || showWatermarkPopover) && (
-          <div 
-            className="fixed inset-0 z-40 bg-transparent" 
-            onClick={() => { setShowColorPicker(false); setShowHighlightPicker(false); setShowWatermarkPopover(false); }} 
-          />
-        )}
-
         {/* Ribbon Content Panels (overflow-visible to prevent clipping popups) */}
         <div className="p-2 px-4 flex items-center gap-3 min-h-[58px] overflow-visible text-xs relative z-30">
           
@@ -574,7 +589,7 @@ export default function Ribbon({
               </div>
 
               {/* Color Palette */}
-              <div className="flex items-center gap-1 border-r border-gray-300 pr-3 relative">
+              <div ref={colorPickerRef} className="flex items-center gap-1 border-r border-gray-300 pr-3 relative">
                 <button
                   onClick={() => setShowColorPicker(!showColorPicker)}
                   className="p-1.5 hover:bg-gray-200 rounded flex items-center gap-1 text-gray-700"
@@ -601,7 +616,7 @@ export default function Ribbon({
               </div>
 
               {/* Text Highlight Color Tool */}
-              <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3 relative">
+              <div ref={highlightPickerRef} className="flex items-center gap-0.5 border-r border-gray-300 pr-3 relative">
                 <button
                   onClick={() => {
                     if (editor.isActive('highlight')) {
@@ -846,7 +861,7 @@ export default function Ribbon({
               </div>
 
               {/* Modern Custom Watermark Popover Tool */}
-              <div className="relative">
+              <div ref={watermarkPopoverRef} className="relative">
                 <button
                   type="button"
                   onClick={() => setShowWatermarkPopover(!showWatermarkPopover)}
