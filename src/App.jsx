@@ -362,10 +362,6 @@ export default function App() {
       setDocId('doc_' + Date.now());
       setDocTitle(cleanTitle);
       setContent(html);
-
-      if (editorInstance) {
-        editorInstance.commands.setContent(html);
-      }
     } catch (err) {
       alert('Error importing DOCX document: ' + err.message);
     }

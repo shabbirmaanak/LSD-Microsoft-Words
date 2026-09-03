@@ -33,9 +33,14 @@ class ErrorBoundary extends React.Component {
               !
             </div>
             <h2 className="text-xl font-bold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-sm text-gray-600 mb-6">
+            <p className="text-sm text-gray-600 mb-3">
               The application encountered a temporary error. Click below to reload cleanly.
             </p>
+            {this.state.error?.message && (
+              <div className="text-[11px] font-mono text-red-600 bg-red-50 p-2.5 rounded border border-red-200 mb-4 text-left overflow-auto max-h-24">
+                {this.state.error.message}
+              </div>
+            )}
             <button
               onClick={this.handleReset}
               className="bg-[#106ebe] hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded shadow transition-colors"

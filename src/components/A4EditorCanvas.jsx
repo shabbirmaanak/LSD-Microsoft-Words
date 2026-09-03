@@ -97,10 +97,10 @@ export default function A4EditorCanvas({
     wide: 'p-24',   // ~1.5 inch
   };
 
-  const selectedPage = PAGE_CONFIG[pageSize] || PAGE_CONFIG.A4;
+  const selectedPage = PAGE_CONFIG[pageSize] || PAGE_CONFIG.A4 || { width: 794, height: 1123 };
   const isLandscape = orientation === 'landscape';
-  const pagePxWidth = isLandscape ? selectedPage.height : selectedPage.width;
-  const pagePxHeight = isLandscape ? selectedPage.width : selectedPage.height;
+  const pagePxWidth = isLandscape ? (selectedPage.height || 1123) : (selectedPage.width || 794);
+  const pagePxHeight = isLandscape ? (selectedPage.width || 794) : (selectedPage.height || 1123);
 
   const paperRef = useRef(null);
   const [totalPages, setTotalPages] = useState(1);
@@ -112,12 +112,16 @@ export default function A4EditorCanvas({
       if (!editorDom) return;
 
       const innerHeight = editorDom.scrollHeight || editorDom.clientHeight || pagePxHeight;
-      const pages = Math.max(1, Math.ceil((innerHeight + 80) / pagePxHeight));
+      const pages = Math.max(1, Math.min(50, Math.ceil((innerHeight + 80) / Math.max(100, pagePxHeight))));
 
       setTotalPages((prev) => {
-        if (prev !== pages) {
+        if (prev !== pages && Number.isFinite(pages)) {
           if (typeof onPageCountChange === 'function') {
-            onPageCountChange(pages);
+            try {
+              onPageCountChange(pages);
+            } catch (err) {
+              console.warn('Failed to update page count', err);
+            }
           }
           return pages;
         }
@@ -125,9 +129,11 @@ export default function A4EditorCanvas({
       });
     };
 
-    const timer = setTimeout(calculatePages, 60);
+    const timer = setTimeout(calculatePages, 80);
     return () => clearTimeout(timer);
   }, [content, orientation, pageSize, margins, pagePxHeight, onPageCountChange]);
+
+  const validPages = (Number.isFinite(totalPages) && totalPages >= 1) ? Math.min(Math.floor(totalPages), 50) : 1;
 
   const editor = useEditor({
     extensions: [
@@ -377,12 +383,12 @@ export default function A4EditorCanvas({
           className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all relative overflow-hidden`}
           style={{ 
             width: `${pagePxWidth}px`,
-            minHeight: `${Math.max(1, totalPages) * pagePxHeight}px`,
+            minHeight: `${validPages * pagePxHeight}px`,
             backgroundColor: paperColor || '#ffffff' 
           }}
         >
           {/* Visual Multi-Page Separation Breaks */}
-          {totalPages > 1 && Array.from({ length: totalPages - 1 }).map((_, idx) => {
+          {validPages > 1 && Array.from({ length: validPages - 1 }).map((_, idx) => {
             const pageNum = idx + 1;
             const topOffset = pageNum * pagePxHeight;
             return (
@@ -397,7 +403,7 @@ export default function A4EditorCanvas({
                     ─── End of Page {pageNum} ───
                   </span>
                   <span className="text-[10px] font-bold bg-white text-gray-700 px-2.5 py-0.5 rounded-full border border-gray-300 shadow-2xs">
-                    📄 Page {pageNum + 1} of {totalPages} ({pageSize})
+                    📄 Page {pageNum + 1} of {validPages} ({pageSize})
                   </span>
                 </div>
               </div>
