@@ -377,69 +377,78 @@ export default function A4EditorCanvas({
         }}
       >
         <div 
-          ref={paperRef}
-          id="letter-paper-canvas"
-          dir={textDirection}
-          className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all relative overflow-hidden`}
+          className="relative w-full"
           style={{ 
             width: `${pagePxWidth}px`,
-            minHeight: `${validPages * pagePxHeight}px`,
-            backgroundColor: paperColor || '#ffffff' 
+            maxWidth: `${pagePxWidth}px`,
           }}
         >
-          {/* Visual Multi-Page Separation Breaks */}
-          {validPages > 1 && Array.from({ length: validPages - 1 }).map((_, idx) => {
-            const pageNum = idx + 1;
-            const topOffset = pageNum * pagePxHeight;
-            return (
-              <div
-                key={pageNum}
-                className="absolute left-0 right-0 pointer-events-none select-none z-20 no-print flex flex-col items-center"
-                style={{ top: `${topOffset}px` }}
-              >
-                {/* Visual Gap Between Pages */}
-                <div className="w-full h-8 bg-[#e8ecef] border-y border-gray-300 shadow-inner flex items-center justify-between px-6">
-                  <span className="text-[10px] font-bold text-gray-500 font-mono tracking-wider">
-                    ─── End of Page {pageNum} ───
-                  </span>
-                  <span className="text-[10px] font-bold bg-white text-gray-700 px-2.5 py-0.5 rounded-full border border-gray-300 shadow-2xs">
-                    📄 Page {pageNum + 1} of {validPages} ({pageSize})
-                  </span>
+          {/* Layer 1: Visual Multi-Page Separation Breaks (Isolated React Overlay) */}
+          <div className="absolute inset-0 pointer-events-none select-none z-20 no-print overflow-hidden">
+            {validPages > 1 && Array.from({ length: validPages - 1 }).map((_, idx) => {
+              const pageNum = idx + 1;
+              const topOffset = pageNum * pagePxHeight;
+              return (
+                <div
+                  key={pageNum}
+                  className="absolute left-0 right-0 flex flex-col items-center"
+                  style={{ top: `${topOffset}px` }}
+                >
+                  <div className="w-full h-8 bg-[#e8ecef] border-y border-gray-300 shadow-inner flex items-center justify-between px-6">
+                    <span className="text-[10px] font-bold text-gray-500 font-mono tracking-wider">
+                      ─── End of Page {pageNum} ───
+                    </span>
+                    <span className="text-[10px] font-bold bg-white text-gray-700 px-2.5 py-0.5 rounded-full border border-gray-300 shadow-2xs">
+                      📄 Page {pageNum + 1} of {validPages} ({pageSize})
+                    </span>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
 
-          {/* Watermark Overlay */}
+          {/* Layer 2: Isolated Watermark */}
           {watermark && (
-            <div className="watermark-text">
+            <div className="watermark-text pointer-events-none select-none z-10">
               {watermark}
             </div>
           )}
 
-          {/* Floating Table Action Bar (Visible when cursor is inside a Table cell) */}
-          {editor && (
-            <BubbleMenu
-              editor={editor}
-              shouldShow={({ editor }) => editor.isActive('table')}
-              tippyOptions={{ duration: 100, placement: 'top' }}
-              className="bg-slate-900 text-white rounded-lg shadow-2xl px-2.5 py-1.5 flex items-center gap-1.5 border border-slate-700 text-xs z-50 no-print"
-            >
-              <span className="text-[11px] font-bold text-amber-400 border-r border-slate-700 pr-1.5">Table Tools:</span>
-              <button
-                onClick={() => editor.chain().focus().addRowAfter().run()}
-                className="px-2 py-0.5 bg-slate-800 hover:bg-emerald-900 text-emerald-300 rounded font-semibold text-[11px] transition-colors"
-                title="Add Row Below"
+          {/* Layer 3: Main Editor Paper Canvas (Contains ONLY EditorContent & Tiptap Menus) */}
+          <div 
+            ref={paperRef}
+            id="letter-paper-canvas"
+            dir={textDirection}
+            className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all relative overflow-hidden`}
+            style={{ 
+              width: `${pagePxWidth}px`,
+              minHeight: `${validPages * pagePxHeight}px`,
+              backgroundColor: paperColor || '#ffffff' 
+            }}
+          >
+            {/* Floating Table Action Bar (Visible when cursor is inside a Table cell) */}
+            {editor && (
+              <BubbleMenu
+                editor={editor}
+                shouldShow={({ editor }) => editor.isActive('table')}
+                tippyOptions={{ duration: 100, placement: 'top' }}
+                className="bg-slate-900 text-white rounded-lg shadow-2xl px-2.5 py-1.5 flex items-center gap-1.5 border border-slate-700 text-xs z-50 no-print"
               >
-                + Row
-              </button>
-              <button
-                onClick={() => editor.chain().focus().addColumnAfter().run()}
-                className="px-2 py-0.5 bg-slate-800 hover:bg-blue-900 text-blue-300 rounded font-semibold text-[11px] transition-colors"
-                title="Add Column Right"
-              >
-                + Col
-              </button>
+                <span className="text-[11px] font-bold text-amber-400 border-r border-slate-700 pr-1.5">Table Tools:</span>
+                <button
+                  onClick={() => editor.chain().focus().addRowAfter().run()}
+                  className="px-2 py-0.5 bg-slate-800 hover:bg-emerald-900 text-emerald-300 rounded font-semibold text-[11px] transition-colors"
+                  title="Add Row Below"
+                >
+                  + Row
+                </button>
+                <button
+                  onClick={() => editor.chain().focus().addColumnAfter().run()}
+                  className="px-2 py-0.5 bg-slate-800 hover:bg-blue-900 text-blue-300 rounded font-semibold text-[11px] transition-colors"
+                  title="Add Column Right"
+                >
+                  + Col
+                </button>
               <div className="w-[1px] h-3.5 bg-slate-700"></div>
               <button
                 onClick={() => editor.chain().focus().deleteRow().run()}
@@ -625,7 +634,8 @@ export default function A4EditorCanvas({
           />
         </div>
       </div>
-
     </div>
+
+  </div>
   );
 }
