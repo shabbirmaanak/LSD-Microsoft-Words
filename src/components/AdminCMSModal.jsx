@@ -13,8 +13,20 @@ import {
   FileUp,
   FileText,
   CheckCircle2,
-  UploadCloud
+  UploadCloud,
+  Cloud,
+  Database,
+  RefreshCw,
+  Globe,
+  HelpCircle
 } from 'lucide-react';
+import {
+  isFirebaseConnected,
+  getStoredFirebaseConfig,
+  saveStoredFirebaseConfig,
+  saveCloudTemplate,
+  deleteCloudTemplate
+} from '../services/firebase';
 
 export default function AdminCMSModal({
   isOpen,
@@ -31,6 +43,14 @@ export default function AdminCMSModal({
   const [authError, setAuthError] = useState(false);
   const [activeTab, setActiveTab] = useState('templates');
 
+  // Firebase Cloud Database Config State
+  const [firebaseConnected, setFirebaseConnected] = useState(isFirebaseConnected());
+  const [firebaseConfigText, setFirebaseConfigText] = useState(() => {
+    const cfg = getStoredFirebaseConfig();
+    return cfg ? JSON.stringify(cfg, null, 2) : '';
+  });
+  const [cloudStatusMsg, setCloudStatusMsg] = useState('');
+
   // Form states for adding new template
   const [newTplTitle, setNewTplTitle] = useState('');
   const [newTplCategory, setNewTplCategory] = useState('Official');
@@ -38,6 +58,10 @@ export default function AdminCMSModal({
   const [newTplContent, setNewTplContent] = useState('');
   const [isParsingDocx, setIsParsingDocx] = useState(false);
   const [docxSuccessMsg, setDocxSuccessMsg] = useState('');
+
+  useEffect(() => {
+    setFirebaseConnected(isFirebaseConnected());
+  }, [isOpen]);
 
   // Handle DOCX Template File Upload & Conversion
   const handleDocxUpload = async (e) => {
@@ -85,7 +109,7 @@ export default function AdminCMSModal({
     }
   };
 
-  const handleCreateTemplate = (e) => {
+  const handleCreateTemplate = async (e) => {
     e.preventDefault();
     if (!newTplTitle.trim() || !newTplContent.trim()) return;
 
@@ -100,17 +124,60 @@ export default function AdminCMSModal({
     const updated = [newTemplate, ...templates];
     onSaveTemplates(updated);
 
+    // Sync to Cloud Firestore if connected
+    if (isFirebaseConnected()) {
+      try {
+        await saveCloudTemplate(newTemplate);
+        console.log('✅ Template broadcasted to Cloud Firestore!');
+      } catch (cloudErr) {
+        console.warn('Failed to save to cloud:', cloudErr);
+      }
+    }
+
     // Reset form
     setNewTplTitle('');
     setNewTplDescription('');
     setNewTplContent('');
+    setDocxSuccessMsg('');
     alert('✅ Template created and published successfully!');
   };
 
-  const handleDeleteTemplate = (id) => {
+  const handleDeleteTemplate = async (id) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
       const updated = templates.filter(t => t.id !== id);
       onSaveTemplates(updated);
+
+      if (isFirebaseConnected()) {
+        try {
+          await deleteCloudTemplate(id);
+          console.log('✅ Template deleted from Cloud Firestore');
+        } catch (cloudErr) {
+          console.warn('Failed to delete from cloud:', cloudErr);
+        }
+      }
+    }
+  };
+
+  const handleSaveFirebaseConfig = (e) => {
+    e.preventDefault();
+    try {
+      if (!firebaseConfigText.trim()) {
+        saveStoredFirebaseConfig(null);
+        setFirebaseConnected(false);
+        setCloudStatusMsg('Disconnected from Cloud Database. Running in local mode.');
+        return;
+      }
+      const parsed = JSON.parse(firebaseConfigText);
+      saveStoredFirebaseConfig(parsed);
+      const isOk = isFirebaseConnected();
+      setFirebaseConnected(isOk);
+      if (isOk) {
+        setCloudStatusMsg('✅ Connected to Firebase Cloud Firestore successfully! Templates will sync to all users worldwide.');
+      } else {
+        setCloudStatusMsg('⚠️ Configuration saved, but connection could not be verified. Please check your apiKey and projectId.');
+      }
+    } catch (err) {
+      alert('Invalid JSON format: ' + err.message);
     }
   };
 
@@ -207,6 +274,19 @@ export default function AdminCMSModal({
               >
                 <Type className="w-4 h-4 text-blue-400" />
                 <span>Custom Fonts ({customFonts.length})</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('cloud')}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+                  activeTab === 'cloud'
+                    ? 'bg-slate-900 text-white shadow-xs'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                <Cloud className="w-4 h-4 text-emerald-400" />
+                <span>Cloud Database Sync</span>
+                <span className={`w-2 h-2 rounded-full ${firebaseConnected ? 'bg-emerald-500 animate-pulse' : 'bg-gray-300'}`} />
               </button>
             </div>
 
@@ -467,6 +547,115 @@ export default function AdminCMSModal({
                       </div>
                     )}
                   </div>
+                </div>
+              )}
+
+              {/* 3. CLOUD DATABASE (FIREBASE) TAB */}
+              {activeTab === 'cloud' && (
+                <div className="space-y-4 text-xs">
+                  {/* Status Banner */}
+                  <div className={`p-4 rounded-xl border flex items-center justify-between gap-3 ${
+                    firebaseConnected 
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900' 
+                      : 'bg-amber-50 border-amber-200 text-amber-900'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2.5 rounded-lg text-white ${firebaseConnected ? 'bg-emerald-600' : 'bg-amber-600'}`}>
+                        <Database className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm">
+                          {firebaseConnected ? '🟢 Firebase Firestore Connected & Active' : '⚪ Local Mode (No Cloud DB Connected)'}
+                        </h4>
+                        <p className="text-[11px] opacity-90 mt-0.5">
+                          {firebaseConnected 
+                            ? 'All templates published in this Admin CMS are automatically synced in real-time to all users worldwide.'
+                            : 'Templates are currently stored on this local device only. Connect Firebase Firestore below to enable global multi-device sync.'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setFirebaseConnected(isFirebaseConnected())}
+                      className="bg-white px-3 py-1.5 rounded-lg border shadow-2xs font-bold text-xs hover:bg-gray-50 shrink-0 flex items-center gap-1"
+                    >
+                      <RefreshCw className="w-3.5 h-3.5" />
+                      <span>Check Status</span>
+                    </button>
+                  </div>
+
+                  {cloudStatusMsg && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-blue-900 font-medium">
+                      {cloudStatusMsg}
+                    </div>
+                  )}
+
+                  {/* Firebase Config Form */}
+                  <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs space-y-4">
+                    <div>
+                      <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                        <Globe className="w-4 h-4 text-[#106ebe]" />
+                        <span>Firebase Cloud Firestore Credentials</span>
+                      </h4>
+                      <p className="text-gray-500 text-[11px] mt-0.5">
+                        Paste your Firebase Web App configuration JSON below to enable automatic global sync across all phones, tablets, and computers.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleSaveFirebaseConfig} className="space-y-3">
+                      <div>
+                        <textarea
+                          rows={7}
+                          value={firebaseConfigText}
+                          onChange={(e) => setFirebaseConfigText(e.target.value)}
+                          placeholder={`{\n  "apiKey": "AIzaSy...",\n  "authDomain": "your-app.firebaseapp.com",\n  "projectId": "your-app-id",\n  "storageBucket": "your-app.appspot.com",\n  "messagingSenderId": "123456789",\n  "appId": "1:123456789:web:abcdef"\n}`}
+                          className="w-full font-mono text-xs p-3 border border-gray-300 rounded-lg focus:ring-1 focus:ring-slate-900 bg-slate-900 text-emerald-400 placeholder:text-gray-600"
+                        />
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="submit"
+                          className="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg font-bold text-xs shadow-xs transition-colors flex items-center gap-1.5"
+                        >
+                          <Cloud className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Save & Connect Firebase</span>
+                        </button>
+
+                        {firebaseConfigText && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (window.confirm('Disconnect from Firebase cloud database?')) {
+                                setFirebaseConfigText('');
+                                saveStoredFirebaseConfig(null);
+                                setFirebaseConnected(false);
+                                setCloudStatusMsg('Disconnected from Cloud Database.');
+                              }
+                            }}
+                            className="bg-red-50 hover:bg-red-100 text-red-700 px-3 py-2 rounded-lg font-bold text-xs border border-red-200 transition-colors"
+                          >
+                            Disconnect
+                          </button>
+                        )}
+                      </div>
+                    </form>
+                  </div>
+
+                  {/* Free Setup Instructions */}
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2">
+                    <h5 className="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+                      <HelpCircle className="w-4 h-4 text-slate-500" />
+                      <span>How to get your free Firebase config in 60 seconds:</span>
+                    </h5>
+                    <ol className="list-decimal list-inside space-y-1 text-[11px] text-slate-600 leading-relaxed">
+                      <li>Go to <a href="https://console.firebase.google.com" target="_blank" rel="noreferrer" className="text-blue-600 underline font-semibold">console.firebase.google.com</a> and click <strong>Create a project</strong> (100% Free).</li>
+                      <li>In your project dashboard, click <strong>Build ➔ Firestore Database</strong> and click <strong>Create database</strong> (in Test Mode).</li>
+                      <li>Go to <strong>Project Settings (⚙️) ➔ General ➔ Your apps</strong>, click the <strong>&lt;/&gt; (Web)</strong> icon, and copy the `firebaseConfig` object.</li>
+                      <li>Paste the JSON above and click <strong>Save & Connect Firebase</strong>!</li>
+                    </ol>
+                  </div>
+
                 </div>
               )}
 

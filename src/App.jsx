@@ -13,6 +13,7 @@ import FontManagerModal from './components/FontManagerModal';
 import AdminCMSModal from './components/AdminCMSModal';
 import { letterTemplates } from './data/letterTemplates';
 import { preinstalledFonts } from './config/defaultFonts';
+import { subscribeToCloudTemplates, isFirebaseConnected } from './services/firebase';
 
 export default function App() {
   // Document State
@@ -138,6 +139,24 @@ export default function App() {
     } catch (e) {
       console.warn('Failed to load custom fonts', e);
     }
+
+    // 4. Real-Time Cloud Firestore Sync
+    const unsubscribeCloud = subscribeToCloudTemplates((cloudTpls) => {
+      if (Array.isArray(cloudTpls) && cloudTpls.length > 0) {
+        setCustomTemplates(cloudTpls);
+        try {
+          localStorage.setItem('word_letters_custom_templates', JSON.stringify(cloudTpls));
+        } catch (e) {
+          console.warn('Failed to cache cloud templates', e);
+        }
+      }
+    });
+
+    return () => {
+      if (typeof unsubscribeCloud === 'function') {
+        unsubscribeCloud();
+      }
+    };
   }, []);
 
   // Handle Global Ctrl+P / Cmd+P Print shortcut
