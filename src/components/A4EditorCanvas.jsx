@@ -71,6 +71,26 @@ const CustomImage = Image.extend({
   },
 });
 
+const CustomTable = Table.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      dir: {
+        default: 'rtl',
+        parseHTML: (element) => element.getAttribute('dir') || 'rtl',
+        renderHTML: (attributes) => {
+          const dir = attributes.dir || 'rtl';
+          return {
+            dir: dir,
+            class: dir === 'ltr' ? 'ltr-table' : 'rtl-table',
+            style: `direction: ${dir} !important; width: 100%; border-collapse: collapse;`,
+          };
+        },
+      },
+    };
+  },
+});
+
 export const PAGE_CONFIG = {
   A4: { name: 'A4', width: 794, height: 1123, label: 'A4 (210 × 297 mm)' },
   Letter: { name: 'Letter', width: 816, height: 1056, label: 'Letter (8.5 × 11 in)' },
@@ -153,7 +173,7 @@ export default function A4EditorCanvas({
       Underline,
       Subscript,
       Superscript,
-      Table.configure({
+      CustomTable.configure({
         resizable: true,
       }),
       TableRow,
@@ -448,6 +468,17 @@ export default function A4EditorCanvas({
                   title="Add Column Right"
                 >
                   + Col
+                </button>
+                <button
+                  onClick={() => {
+                    const currentDir = editor.getAttributes('table').dir || 'rtl';
+                    const nextDir = currentDir === 'rtl' ? 'ltr' : 'rtl';
+                    editor.chain().focus().updateAttributes('table', { dir: nextDir }).run();
+                  }}
+                  className="px-2 py-0.5 bg-slate-800 hover:bg-amber-900 text-amber-300 rounded font-semibold text-[11px] transition-colors"
+                  title="Flip Table Direction (Right-to-Left / Left-to-Right)"
+                >
+                  ⇄ Flip RTL/LTR
                 </button>
               <div className="w-[1px] h-3.5 bg-slate-700"></div>
               <button

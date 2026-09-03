@@ -101,7 +101,8 @@
 .rtl-editor table,
 [dir="rtl"] .ProseMirror,
 [dir="rtl"] table,
-table[dir="rtl"] {
+table[dir="rtl"],
+.rtl-table {
   direction: rtl !important;
   text-align: right;
 }
@@ -111,7 +112,9 @@ table[dir="rtl"] {
 [dir="rtl"] .ProseMirror th,
 [dir="rtl"] .ProseMirror td,
 table[dir="rtl"] th,
-table[dir="rtl"] td {
+table[dir="rtl"] td,
+.rtl-table th,
+.rtl-table td {
   text-align: right;
   direction: rtl !important;
 }
@@ -119,6 +122,19 @@ table[dir="rtl"] td {
 .ltr-editor .ProseMirror {
   direction: ltr;
   text-align: left;
+}
+
+.ProseMirror table.ltr-table,
+table[dir="ltr"] {
+  direction: ltr !important;
+}
+
+.ProseMirror table.ltr-table th,
+.ProseMirror table.ltr-table td,
+table[dir="ltr"] th,
+table[dir="ltr"] td {
+  text-align: left !important;
+  direction: ltr !important;
 }
 
 /* Calligraphy Headers */
