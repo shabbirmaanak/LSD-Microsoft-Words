@@ -14,7 +14,29 @@ import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
 import TableHeader from '@tiptap/extension-table-header';
 import Image from '@tiptap/extension-image';
-import { FontSize } from '../extensions/FontSize';
+import { Extension, textInputRule } from '@tiptap/core';
+
+const LsdKeyMappings = Extension.create({
+  name: 'lsdKeyMappings',
+  addInputRules() {
+    return [
+      textInputRule({ find: /pp$/i, replace: 'چ' }),
+      textInputRule({ find: /حح$/i, replace: 'چ' }),
+      textInputRule({ find: /;;$/i, replace: 'گ' }),
+      textInputRule({ find: /كك$/i, replace: 'گ' }),
+      textInputRule({ find: /ee$/i, replace: 'پ' }),
+      textInputRule({ find: /ثث$/i, replace: 'پ' }),
+      textInputRule({ find: /ss$/i, replace: 'ے' }),
+      textInputRule({ find: /سس$/i, replace: 'ے' }),
+      textInputRule({ find: /qq$/i, replace: 'ٹ' }),
+      textInputRule({ find: /ضض$/i, replace: 'ٹ' }),
+      textInputRule({ find: /ww$/i, replace: 'ں' }),
+      textInputRule({ find: /صص$/i, replace: 'ں' }),
+      textInputRule({ find: /hh$/i, replace: 'ھ' }),
+      textInputRule({ find: /هه$/i, replace: 'ھ' }),
+    ];
+  },
+});
 import { Bold, Italic, Underline as UnderlineIcon, AlignLeft, AlignCenter, AlignRight, Highlighter } from 'lucide-react';
 
 const CustomImage = Image.extend({
@@ -184,6 +206,7 @@ export default function A4EditorCanvas({
       TableHeader,
       TableCell,
       CustomImage,
+      LsdKeyMappings,
     ],
     content: content,
     onUpdate: ({ editor }) => {
@@ -194,40 +217,60 @@ export default function A4EditorCanvas({
         const { $from } = view.state.selection;
         const charBefore = $from.nodeBefore?.text ? $from.nodeBefore.text.slice(-1) : '';
 
-        // Double-key replacements (e.g. سس => ے, ss => ے, ee => پ, ;; => گ, pp => چ)
+        // Double-key replacements (e.g. pp => چ, ;; => گ, ee => پ, ss => ے, qq => ٹ, ww => ں, hh => ھ)
         if (!event.ctrlKey && !event.metaKey && !event.altKey) {
-          // س + س OR s + s => ے (Bari Ye)
-          if ((event.key === 'س' && charBefore === 'س') || (event.key === 's' && charBefore === 's')) {
-            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ے');
+          // p + p OR ح + ح => چ (Che)
+          if ((event.key.toLowerCase() === 'p' && (charBefore.toLowerCase() === 'p' || charBefore === 'ح')) ||
+              (event.key === 'ح' && (charBefore === 'ح' || charBefore.toLowerCase() === 'p')) ||
+              (event.key === 'چ' && charBefore === 'چ')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('چ');
             view.dispatch(tr);
             return true;
           }
-          // e + e OR پ + پ => پ (Pe)
-          if ((event.key === 'e' && charBefore === 'e') || (event.key === 'پ' && charBefore === 'پ')) {
+          // e + e OR ث + ث OR پ + پ => پ (Pe)
+          if ((event.key.toLowerCase() === 'e' && (charBefore.toLowerCase() === 'e' || charBefore === 'ث')) ||
+              (event.key === 'ث' && (charBefore === 'ث' || charBefore.toLowerCase() === 'e')) ||
+              (event.key === 'پ' && charBefore === 'پ')) {
             const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('پ');
             view.dispatch(tr);
             return true;
           }
           // ; + ; OR ك + ك => گ (Gaf)
-          if ((event.key === ';' && charBefore === ';') || (event.key === 'ك' && charBefore === 'ك')) {
+          if ((event.key === ';' && (charBefore === ';' || charBefore === 'ك')) ||
+              (event.key === 'ك' && (charBefore === 'ك' || charBefore === ';')) ||
+              (event.key === 'گ' && charBefore === 'گ')) {
             const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('گ');
             view.dispatch(tr);
             return true;
           }
-          // p + p OR چ + چ => چ (Che)
-          if ((event.key === 'p' && charBefore === 'p') || (event.key === 'چ' && charBefore === 'چ')) {
-            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('چ');
+          // s + s OR س + س => ے (Bari Ye)
+          if ((event.key.toLowerCase() === 's' && (charBefore.toLowerCase() === 's' || charBefore === 'س')) ||
+              (event.key === 'س' && (charBefore === 'س' || charBefore.toLowerCase() === 's')) ||
+              (event.key === 'ے' && charBefore === 'ے')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ے');
             view.dispatch(tr);
             return true;
           }
-          // q + q OR ط + ط => ٹ (Tte)
-          if ((event.key === 'q' && charBefore === 'q') || (event.key === 'ط' && charBefore === 'ط')) {
+          // q + q OR ض + ض => ٹ (Tte)
+          if ((event.key.toLowerCase() === 'q' && (charBefore.toLowerCase() === 'q' || charBefore === 'ض')) ||
+              (event.key === 'ض' && (charBefore === 'ض' || charBefore.toLowerCase() === 'q')) ||
+              (event.key === 'ٹ' && charBefore === 'ٹ')) {
             const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ٹ');
             view.dispatch(tr);
             return true;
           }
-          // ح + ح => ھ (Do-chashmi He)
-          if (event.key === 'ح' && charBefore === 'ح') {
+          // w + w OR ص + ص => ں (Noon Ghunna)
+          if ((event.key.toLowerCase() === 'w' && (charBefore.toLowerCase() === 'w' || charBefore === 'ص')) ||
+              (event.key === 'ص' && (charBefore === 'ص' || charBefore.toLowerCase() === 'w')) ||
+              (event.key === 'ں' && charBefore === 'ں')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ں');
+            view.dispatch(tr);
+            return true;
+          }
+          // h + h OR ه + ه => ھ (Do-chashmi He)
+          if ((event.key.toLowerCase() === 'h' && (charBefore.toLowerCase() === 'h' || charBefore === 'ه' || charBefore === 'ھ')) ||
+              (event.key === 'ه' && (charBefore === 'ه' || charBefore.toLowerCase() === 'h')) ||
+              (event.key === 'ھ' && charBefore === 'ھ')) {
             const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ھ');
             view.dispatch(tr);
             return true;
@@ -236,11 +279,11 @@ export default function A4EditorCanvas({
 
         // Single Shift Shortcuts (Shift + P -> چ, Shift + K -> گ, Shift + Z -> ژ, etc)
         if (event.shiftKey && !event.ctrlKey && !event.metaKey) {
-          if (event.key === 'P') { // Shift + P -> چ
+          if (event.key === 'P' || event.key === 'ح') { // Shift + P -> چ
             view.dispatch(view.state.tr.insertText('چ'));
             return true;
           }
-          if (event.key === 'K') { // Shift + K -> گ
+          if (event.key === 'K' || event.key === 'ن') { // Shift + K -> گ
             view.dispatch(view.state.tr.insertText('گ'));
             return true;
           }
