@@ -416,7 +416,7 @@ export default function Ribbon({
       </div>
 
       {/* ==================== 2. DESKTOP FULL RIBBON TAB (Visible on Desktop >= 768px) ==================== */}
-      <div className="hidden md:block bg-[#f3f2f1] border-b border-gray-300">
+      <div className="hidden md:block bg-[#f3f2f1] border-b border-gray-300 relative z-30">
         {/* Ribbon Navigation Tabs */}
         <div className="flex items-center px-4 bg-[#e1dfdd]/40 border-b border-gray-300/80 text-xs">
           <div className="flex items-center">
@@ -436,8 +436,16 @@ export default function Ribbon({
           </div>
         </div>
 
-        {/* Ribbon Content Panels */}
-        <div className="p-2 px-4 flex items-center gap-4 min-h-[64px] overflow-x-auto text-xs">
+        {/* Global Click-Away Dismiss for Dropdowns */}
+        {(showColorPicker || showHighlightPicker) && (
+          <div 
+            className="fixed inset-0 z-40 bg-transparent" 
+            onClick={() => { setShowColorPicker(false); setShowHighlightPicker(false); }} 
+          />
+        )}
+
+        {/* Ribbon Content Panels (overflow-visible to prevent clipping popups) */}
+        <div className="p-2 px-4 flex items-center gap-3 min-h-[58px] overflow-visible text-xs relative z-30">
           
           {/* HOME TAB */}
           {activeTab === 'home' && (
