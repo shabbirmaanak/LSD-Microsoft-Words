@@ -40,6 +40,8 @@ export default function Ribbon({
   const [activeTab, setActiveTab] = useState('home');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
+  const [showWatermarkPopover, setShowWatermarkPopover] = useState(false);
+  const [customWatermarkInput, setCustomWatermarkInput] = useState(watermark || '');
 
   if (!editor) return null;
 
@@ -437,10 +439,10 @@ export default function Ribbon({
         </div>
 
         {/* Global Click-Away Dismiss for Dropdowns */}
-        {(showColorPicker || showHighlightPicker) && (
+        {(showColorPicker || showHighlightPicker || showWatermarkPopover) && (
           <div 
             className="fixed inset-0 z-40 bg-transparent" 
-            onClick={() => { setShowColorPicker(false); setShowHighlightPicker(false); }} 
+            onClick={() => { setShowColorPicker(false); setShowHighlightPicker(false); setShowWatermarkPopover(false); }} 
           />
         )}
 
@@ -843,20 +845,116 @@ export default function Ribbon({
                 )}
               </div>
 
-              <div className="flex items-center gap-1.5 bg-white border border-gray-300 px-2 py-1 rounded shadow-sm">
-                <Stamp className="w-4 h-4 text-red-500" />
-                <span className="text-gray-600 font-medium">Watermark:</span>
-                <select
-                  value={watermark}
-                  onChange={(e) => setWatermark(e.target.value)}
-                  className="bg-transparent text-xs font-semibold focus:outline-none cursor-pointer"
+              {/* Modern Custom Watermark Popover Tool */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowWatermarkPopover(!showWatermarkPopover)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-semibold text-xs shadow-xs transition-colors ${
+                    watermark ? 'bg-red-50 border-red-300 text-red-900' : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-50'
+                  }`}
+                  title="Add or Customize Watermark"
                 >
-                  <option value="">None</option>
-                  <option value="DRAFT">DRAFT</option>
-                  <option value="CONFIDENTIAL">CONFIDENTIAL</option>
-                  <option value="URGENT">URGENT</option>
-                  <option value="OFFICIAL">OFFICIAL</option>
-                </select>
+                  <Stamp className={`w-4 h-4 ${watermark ? 'text-red-600' : 'text-gray-500'}`} />
+                  <span>Watermark:</span>
+                  <span className="font-bold max-w-[100px] truncate text-red-700">
+                    {watermark || 'None'}
+                  </span>
+                  <span className="text-[10px] text-gray-500">▼</span>
+                </button>
+
+                {showWatermarkPopover && (
+                  <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-3 z-50 w-72 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
+                      <span className="font-bold text-gray-900 text-xs flex items-center gap-1.5">
+                        <Stamp className="w-3.5 h-3.5 text-red-600" />
+                        <span>Watermark Settings</span>
+                      </span>
+                      {watermark && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setWatermark('');
+                            setCustomWatermarkInput('');
+                            setShowWatermarkPopover(false);
+                          }}
+                          className="text-[10px] text-red-600 hover:underline font-bold"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Custom Text Input */}
+                    <div>
+                      <label className="block text-[11px] font-semibold text-gray-700 mb-1">
+                        Custom Watermark Text:
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="Type custom text (e.g. Al-Jamea)..."
+                          value={customWatermarkInput}
+                          onChange={(e) => setCustomWatermarkInput(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && customWatermarkInput.trim()) {
+                              setWatermark(customWatermarkInput.trim());
+                              setShowWatermarkPopover(false);
+                            }
+                          }}
+                          className="flex-1 px-2.5 py-1.5 border border-gray-300 rounded text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (customWatermarkInput.trim()) {
+                              setWatermark(customWatermarkInput.trim());
+                              setShowWatermarkPopover(false);
+                            }
+                          }}
+                          disabled={!customWatermarkInput.trim()}
+                          className="bg-[#106ebe] hover:bg-blue-700 disabled:opacity-40 text-white font-bold px-2.5 py-1.5 rounded text-xs transition-colors shadow-2xs shrink-0"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Quick Presets */}
+                    <div>
+                      <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                        Or Pick Fast Preset:
+                      </span>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {[
+                          { label: 'DRAFT', val: 'DRAFT' },
+                          { label: 'CONFIDENTIAL', val: 'CONFIDENTIAL' },
+                          { label: 'URGENT', val: 'URGENT' },
+                          { label: 'OFFICIAL', val: 'OFFICIAL' },
+                          { label: 'مسودة (Draft)', val: 'مسودة' },
+                          { label: 'سري للغاية', val: 'سري للغاية' },
+                        ].map((item) => (
+                          <button
+                            key={item.val}
+                            type="button"
+                            onClick={() => {
+                              setWatermark(item.val);
+                              setCustomWatermarkInput(item.val);
+                              setShowWatermarkPopover(false);
+                            }}
+                            className={`px-2 py-1 rounded text-[11px] font-semibold border text-left truncate transition-colors ${
+                              watermark === item.val
+                                ? 'bg-red-50 border-red-300 text-red-800 font-bold'
+                                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
