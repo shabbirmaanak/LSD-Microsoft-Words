@@ -306,75 +306,239 @@ export default function Ribbon({
                   editor.chain().focus().unsetHighlight().run();
                   setShowHighlightPicker(false);
                 }}
+                className="text-[11px] text-red-600 hover:bg-red-50 py-1 px-2 rounded text-left font-semibold border-t border-gray-100"
               >
-                عريضة لسان الدعوة (Arzi)
-              </button>
-              <button
-                onClick={() => onInsertBlock('template-lisan-business')}
-                className="bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1 rounded text-emerald-900 font-bold font-serif"
-              >
-                مكتوب تجاري (Business)
+                ✕ Clear highlight
               </button>
             </div>
           )}
-
-          {/* FILE TAB */}
-          {activeTab === 'file' && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onNewLetter}
-                className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded text-gray-800 font-medium shadow-sm"
-              >
-                <Plus className="w-4 h-4 text-green-600" />
-                <span>New Letter</span>
-              </button>
-
-              <label className="flex items-center gap-1.5 bg-white border border-blue-400 hover:bg-blue-50 text-[#106ebe] px-3 py-1.5 rounded font-bold shadow-sm cursor-pointer transition-colors">
-                <FileText className="w-4 h-4 text-[#106ebe]" />
-                <span>Open / Import (.docx)</span>
-                <input
-                  type="file"
-                  accept=".docx"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file && onImportDOCX) {
-                      onImportDOCX(file);
-                    }
-                  }}
-                />
-              </label>
-
-              <button
-                onClick={onExportDOCX}
-                className="flex items-center gap-1.5 bg-[#106ebe] hover:bg-blue-800 text-white px-3.5 py-1.5 rounded font-bold shadow-sm transition-colors"
-                title="Download as Editable Microsoft Word Document (.docx)"
-              >
-                <FileText className="w-4 h-4 text-blue-200" />
-                <span>Download as Word (.docx)</span>
-              </button>
-
-              <button
-                onClick={onExportPDF}
-                className="flex items-center gap-1.5 bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded font-medium shadow-sm"
-              >
-                <Download className="w-4 h-4 text-red-200" />
-                <span>Export as PDF</span>
-              </button>
-
-              <button
-                onClick={onPrint}
-                className="flex items-center gap-1.5 bg-gray-800 hover:bg-gray-900 text-white px-3 py-1.5 rounded font-medium shadow-sm"
-              >
-                <Printer className="w-4 h-4 text-gray-300" />
-                <span>Print Letter</span>
-              </button>
-            </div>
-          )}
-
         </div>
-      </div>
 
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Table & Bismillah Header Shortcuts */}
+        <button
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+          className="p-1.5 hover:bg-black/10 rounded transition-colors text-gray-700 flex items-center gap-1"
+          title="Insert Table (3 × 3)"
+        >
+          <Table className="w-4 h-4 text-blue-700" />
+        </button>
+
+        <button
+          onClick={() => onInsertBlock?.('bismillah')}
+          className="px-2 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-950 font-bold rounded-full transition-colors flex items-center gap-1 text-[11px]"
+          title="Insert Bismillah Calligraphy Header"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
+          <span>Bismillah</span>
+        </button>
+
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Text Alignment */}
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('left').run()}
+            className={`p-1.5 rounded ${editor.isActive({ textAlign: 'left' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Align left"
+          >
+            <AlignLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('center').run()}
+            className={`p-1.5 rounded ${editor.isActive({ textAlign: 'center' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Align center"
+          >
+            <AlignCenter className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('right').run()}
+            className={`p-1.5 rounded ${editor.isActive({ textAlign: 'right' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Align right"
+          >
+            <AlignRight className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().setTextAlign('justify').run()}
+            className={`p-1.5 rounded ${editor.isActive({ textAlign: 'justify' }) ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Justify"
+          >
+            <AlignJustify className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Text Direction (LTR / RTL) */}
+        <div className="flex items-center bg-white/70 p-0.5 rounded border border-gray-300">
+          <button
+            onClick={() => setTextDirection('ltr')}
+            className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
+              textDirection === 'ltr' ? 'bg-[#4285F4] text-white shadow-2xs' : 'text-gray-600 hover:text-gray-900'
+            }`}
+            title="Left-to-Right Direction (LTR)"
+          >
+            &gt;&para; LTR
+          </button>
+          <button
+            onClick={() => setTextDirection('rtl')}
+            className={`px-2 py-0.5 rounded text-xs font-bold transition-all ${
+              textDirection === 'rtl' ? 'bg-[#046a38] text-white shadow-2xs' : 'text-gray-600 hover:text-gray-900'
+            }`}
+            title="Right-to-Left Arabic / LSD Direction (RTL)"
+          >
+            &para;&lt; RTL
+          </button>
+        </div>
+
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Bullet List & Numbered List */}
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => editor.chain().focus().toggleBulletList().run()}
+            className={`p-1.5 rounded ${editor.isActive('bulletList') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Bulleted list"
+          >
+            <List className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleOrderedList().run()}
+            className={`p-1.5 rounded ${editor.isActive('orderedList') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Numbered list"
+          >
+            <ListOrdered className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Indent / Outdent */}
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+            className="p-1.5 hover:bg-black/10 rounded text-gray-700"
+            title="Decrease indent"
+          >
+            <Outdent className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+            className="p-1.5 hover:bg-black/10 rounded text-gray-700"
+            title="Increase indent"
+          >
+            <Indent className="w-4 h-4" />
+          </button>
+        </div>
+
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Watermark Tool Popover */}
+        <div ref={watermarkPopoverRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setShowWatermarkPopover(!showWatermarkPopover)}
+            className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
+              watermark ? 'bg-red-100 text-red-900 border border-red-300 font-bold' : 'hover:bg-black/10 text-gray-700'
+            }`}
+            title="Watermark Settings"
+          >
+            <Stamp className="w-3.5 h-3.5 text-red-600" />
+            <span className="max-w-[70px] truncate">{watermark || 'Watermark'}</span>
+            <ChevronDown className="w-2.5 h-2.5 text-gray-500" />
+          </button>
+
+          {showWatermarkPopover && (
+            <div className="absolute top-10 right-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-3 z-50 w-72 flex flex-col gap-2.5">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
+                <span className="font-bold text-gray-900 text-xs flex items-center gap-1.5">
+                  <Stamp className="w-3.5 h-3.5 text-red-600" />
+                  <span>Custom Watermark</span>
+                </span>
+                {watermark && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setWatermark('');
+                      setCustomWatermarkInput('');
+                      setShowWatermarkPopover(false);
+                    }}
+                    className="text-[10px] text-red-600 hover:underline font-bold"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-gray-700 mb-1">Custom text:</label>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    placeholder="e.g. Al-Jamea, CONFIDENTIAL..."
+                    value={customWatermarkInput}
+                    onChange={(e) => setCustomWatermarkInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && customWatermarkInput.trim()) {
+                        setWatermark(customWatermarkInput.trim());
+                        setShowWatermarkPopover(false);
+                      }
+                    }}
+                    className="flex-1 px-2.5 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (customWatermarkInput.trim()) {
+                        setWatermark(customWatermarkInput.trim());
+                        setShowWatermarkPopover(false);
+                      }
+                    }}
+                    className="bg-[#1a73e8] text-white px-2.5 py-1 rounded font-bold text-xs"
+                  >
+                    Apply
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-1 pt-1 border-t border-gray-100">
+                {['DRAFT', 'CONFIDENTIAL', 'URGENT', 'مسودة', 'سري للغاية'].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => {
+                      setWatermark(val);
+                      setCustomWatermarkInput(val);
+                      setShowWatermarkPopover(false);
+                    }}
+                    className="px-2 py-1 rounded text-[11px] font-medium bg-gray-50 hover:bg-gray-100 border border-gray-200 text-left truncate"
+                  >
+                    {val}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Arabic Keyboard Toggle */}
+        <button
+          onClick={onToggleArabicKeyboard}
+          className="p-1.5 hover:bg-black/10 rounded transition-colors text-emerald-800 flex items-center gap-1 bg-emerald-50 px-2 border border-emerald-300 font-bold"
+          title="Toggle Lisan al Dawat Virtual Keyboard"
+        >
+          <Keyboard className="w-4 h-4 text-emerald-700" />
+          <span className="hidden lg:inline text-[11px]">Keyboard</span>
+        </button>
+
+        {/* Clear Formatting */}
+        <button
+          onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()}
+          className="p-1.5 hover:bg-black/10 rounded text-gray-700"
+          title="Clear formatting (Ctrl+\)"
+        >
+          <Eraser className="w-4 h-4" />
+        </button>
+
+      </div>
     </div>
   );
 }
