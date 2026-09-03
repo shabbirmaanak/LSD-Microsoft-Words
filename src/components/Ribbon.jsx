@@ -28,6 +28,7 @@ export default function Ribbon({
   onOpenFontManagerModal,
   onExportPDF,
   onExportDOCX,
+  onImportDOCX,
   onPrint,
   onNewLetter,
   onInsertDate,
@@ -817,6 +818,22 @@ export default function Ribbon({
                 <Plus className="w-4 h-4 text-green-600" />
                 <span>New Letter</span>
               </button>
+
+              <label className="flex items-center gap-1.5 bg-white border border-blue-400 hover:bg-blue-50 text-[#106ebe] px-3 py-1.5 rounded font-bold shadow-sm cursor-pointer transition-colors">
+                <FileText className="w-4 h-4 text-[#106ebe]" />
+                <span>Open / Import (.docx)</span>
+                <input
+                  type="file"
+                  accept=".docx"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file && onImportDOCX) {
+                      onImportDOCX(file);
+                    }
+                  }}
+                />
+              </label>
 
               <button
                 onClick={onExportDOCX}

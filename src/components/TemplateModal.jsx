@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { X, Search, LayoutTemplate, ArrowRight, Check } from 'lucide-react';
+import mammoth from 'mammoth';
+import { X, Search, LayoutTemplate, ArrowRight, Check, FileUp } from 'lucide-react';
 import { letterTemplates } from '../data/letterTemplates';
 
-export default function TemplateModal({ isOpen, onClose, onSelectTemplate, templates = letterTemplates }) {
+export default function TemplateModal({ isOpen, onClose, onSelectTemplate, templates = letterTemplates, onImportDOCX }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [isImporting, setIsImporting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -17,29 +19,78 @@ export default function TemplateModal({ isOpen, onClose, onSelectTemplate, templ
     return matchesCategory && matchesSearch;
   });
 
+  const handleDocxFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.docx')) {
+      alert('Please select a valid Microsoft Word (.docx) file.');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      if (onImportDOCX) {
+        await onImportDOCX(file);
+        onClose();
+      } else {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        const html = result.value;
+        const title = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        onSelectTemplate({
+          title,
+          category: 'Imported Word Doc',
+          content: html,
+          description: `Imported from ${file.name}`
+        });
+        onClose();
+      }
+    } catch (err) {
+      alert('Error importing DOCX file: ' + err.message);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-200 animate-in fade-in zoom-in-95 duration-150">
         
         {/* Modal Header */}
-        <div className="bg-gradient-to-r from-[#106ebe] to-blue-800 text-white p-5 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-[#106ebe] to-blue-800 text-white p-4 sm:p-5 flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-3">
             <div className="bg-white/10 p-2 rounded-lg backdrop-blur-md">
               <LayoutTemplate className="w-6 h-6 text-blue-200" />
             </div>
             <div>
-              <h2 className="text-xl font-bold tracking-tight">Select a Letter Template</h2>
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight">Document Templates</h2>
               <p className="text-xs text-blue-100 mt-0.5">
-                Choose from professionally structured layouts formatted for standard business and personal correspondence.
+                Choose a structured letter layout or import your own Word (.docx) file directly.
               </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 hover:bg-white/20 rounded-lg transition-colors text-blue-100 hover:text-white"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          
+          <div className="flex items-center gap-2">
+            <label className="bg-white/10 hover:bg-white/20 text-white border border-white/30 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer transition-colors flex items-center gap-1.5 shadow-xs">
+              <FileUp className="w-4 h-4 text-blue-200" />
+              <span>{isImporting ? 'Importing...' : 'Upload Word (.docx)'}</span>
+              <input
+                type="file"
+                accept=".docx"
+                className="hidden"
+                onChange={handleDocxFile}
+                disabled={isImporting}
+              />
+            </label>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 hover:bg-white/20 rounded-lg transition-colors text-blue-100 hover:text-white"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Filter & Search Toolbar */}

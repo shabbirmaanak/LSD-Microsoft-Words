@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import mammoth from 'mammoth';
 import { 
   ShieldCheck, 
   Lock, 
@@ -8,7 +9,11 @@ import {
   LayoutTemplate, 
   X, 
   KeyRound,
-  Sparkles
+  Sparkles,
+  FileUp,
+  FileText,
+  CheckCircle2,
+  UploadCloud
 } from 'lucide-react';
 
 export default function AdminCMSModal({
@@ -30,14 +35,40 @@ export default function AdminCMSModal({
   const [newTplCategory, setNewTplCategory] = useState('Official');
   const [newTplDescription, setNewTplDescription] = useState('');
   const [newTplContent, setNewTplContent] = useState('');
+  const [isParsingDocx, setIsParsingDocx] = useState(false);
+  const [docxSuccessMsg, setDocxSuccessMsg] = useState('');
 
-  // Check cached admin auth
-  useEffect(() => {
-    const cachedAuth = sessionStorage.getItem('word_letters_admin_auth');
-    if (cachedAuth === 'true') {
-      setIsAuthenticated(true);
+  // Handle DOCX Template File Upload & Conversion
+  const handleDocxUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith('.docx')) {
+      alert('Please select a valid Microsoft Word (.docx) file.');
+      return;
     }
-  }, []);
+
+    setIsParsingDocx(true);
+    setDocxSuccessMsg('');
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      const extractedHtml = result.value;
+
+      const rawTitle = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+      const cleanTitle = rawTitle.charAt(0).toUpperCase() + rawTitle.slice(1);
+
+      setNewTplTitle(cleanTitle);
+      setNewTplContent(extractedHtml);
+      setNewTplDescription(`Imported from Word template (${file.name})`);
+      setDocxSuccessMsg(`Successfully extracted template from "${file.name}"!`);
+    } catch (err) {
+      alert('Failed to parse DOCX file: ' + err.message);
+    } finally {
+      setIsParsingDocx(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -181,10 +212,57 @@ export default function AdminCMSModal({
                   
                   {/* Create New Template Card */}
                   <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-2xs space-y-4">
-                    <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-2">
-                      <Plus className="w-4 h-4 text-emerald-600" />
-                      <span>Create & Publish New Document Template</span>
-                    </h4>
+                    <div className="flex items-center justify-between border-b border-gray-100 pb-2 flex-wrap gap-2">
+                      <h4 className="font-bold text-sm text-gray-900 flex items-center gap-2">
+                        <Plus className="w-4 h-4 text-emerald-600" />
+                        <span>Create & Publish New Document Template</span>
+                      </h4>
+
+                      {/* Direct DOCX File Upload Button */}
+                      <label className="bg-[#106ebe] hover:bg-blue-700 text-white px-3.5 py-1.5 rounded-lg font-bold text-xs shadow-xs cursor-pointer transition-colors flex items-center gap-1.5">
+                        <FileUp className="w-4 h-4 text-blue-200" />
+                        <span>{isParsingDocx ? 'Converting DOCX...' : 'Upload Word (.docx) Template'}</span>
+                        <input
+                          type="file"
+                          accept=".docx"
+                          className="hidden"
+                          onChange={handleDocxUpload}
+                          disabled={isParsingDocx}
+                        />
+                      </label>
+                    </div>
+
+                    {/* DOCX Upload Info Banner */}
+                    <div className="bg-gradient-to-r from-blue-50 to-indigo-50/70 border border-blue-200/80 p-3.5 rounded-xl flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="bg-[#106ebe] text-white p-2 rounded-lg shrink-0">
+                          <FileText className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-blue-950">Have a Microsoft Word (.docx) letter template file?</p>
+                          <p className="text-[11px] text-blue-800/80">Click the button on the right to upload any .docx file. It will automatically extract formatting, paragraphs, and tables!</p>
+                        </div>
+                      </div>
+
+                      <label className="bg-white hover:bg-blue-50 text-[#106ebe] border border-blue-300 px-3 py-1.5 rounded-lg font-bold text-xs shadow-2xs cursor-pointer transition-colors shrink-0 flex items-center gap-1">
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Choose .DOCX</span>
+                        <input
+                          type="file"
+                          accept=".docx"
+                          className="hidden"
+                          onChange={handleDocxUpload}
+                          disabled={isParsingDocx}
+                        />
+                      </label>
+                    </div>
+
+                    {docxSuccessMsg && (
+                      <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-3.5 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 animate-fade-in">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>{docxSuccessMsg}</span>
+                      </div>
+                    )}
 
                     <form onSubmit={handleCreateTemplate} className="space-y-3 text-xs">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

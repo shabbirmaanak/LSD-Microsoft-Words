@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import mammoth from 'mammoth';
 import HeaderBar from './components/HeaderBar';
 import Ribbon from './components/Ribbon';
 import A4EditorCanvas from './components/A4EditorCanvas';
@@ -282,10 +283,34 @@ export default function App() {
     if (template.watermark) {
       setWatermark(template.watermark);
     }
-    if (template.category.includes('Lisan') || template.category.includes('Arabic')) {
+    if (template.category && (template.category.includes('Lisan') || template.category.includes('Arabic'))) {
       setTextDirection('rtl');
     } else {
       setTextDirection('ltr');
+    }
+  };
+
+  // Import Word (.docx) Document Directly into Editor
+  const handleImportDOCX = async (file) => {
+    if (!file) return;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({ arrayBuffer });
+      const html = result.value;
+
+      const cleanTitle = file.name.toLowerCase().endsWith('.docx')
+        ? file.name
+        : `${file.name}.docx`;
+
+      setDocId('doc_' + Date.now());
+      setDocTitle(cleanTitle);
+      setContent(html);
+
+      if (editorInstance) {
+        editorInstance.commands.setContent(html);
+      }
+    } catch (err) {
+      alert('Error importing DOCX document: ' + err.message);
     }
   };
 
@@ -443,6 +468,7 @@ export default function App() {
         onOpenFontManagerModal={() => setIsFontManagerModalOpen(true)}
         onExportPDF={handleExportPDF}
         onExportDOCX={handleExportDOCX}
+        onImportDOCX={handleImportDOCX}
         onPrint={handlePrint}
         onNewLetter={handleNewLetter}
         onInsertDate={handleInsertDate}
@@ -494,6 +520,7 @@ export default function App() {
         onClose={() => setIsTemplateModalOpen(false)}
         onSelectTemplate={handleSelectTemplate}
         templates={customTemplates}
+        onImportDOCX={handleImportDOCX}
       />
 
       <SavedDocsModal
