@@ -97,26 +97,25 @@
 /* RTL Specific Page Formatting */
 .rtl-editor .ProseMirror,
 .rtl-editor #letter-paper-canvas,
-.rtl-editor .ProseMirror table,
-.rtl-editor table,
-[dir="rtl"] .ProseMirror,
-[dir="rtl"] table,
-table[dir="rtl"],
-.rtl-table {
-  direction: rtl !important;
+[dir="rtl"] .ProseMirror {
+  direction: rtl;
   text-align: right;
 }
 
-.rtl-editor .ProseMirror th,
-.rtl-editor .ProseMirror td,
-[dir="rtl"] .ProseMirror th,
-[dir="rtl"] .ProseMirror td,
-table[dir="rtl"] th,
-table[dir="rtl"] td,
-.rtl-table th,
-.rtl-table td {
+/* Base ProseMirror Table Formatting */
+.ProseMirror table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: 1rem 0 !important;
+}
+
+.ProseMirror table th,
+.ProseMirror table td {
+  border: 1px solid #cbd5e1 !important;
+  padding: 8px 12px !important;
+  min-width: 40px !important;
+  vertical-align: top !important;
   text-align: right;
-  direction: rtl !important;
 }
 
 .ltr-editor .ProseMirror {
@@ -124,15 +123,21 @@ table[dir="rtl"] td,
   text-align: left;
 }
 
-.ProseMirror table.ltr-table,
-table[dir="ltr"] {
+/* Explicit Table Direction Controls */
+table[dir="rtl"],
+.rtl-table {
+  direction: rtl !important;
+}
+
+table[dir="ltr"],
+.ltr-table {
   direction: ltr !important;
 }
 
-.ProseMirror table.ltr-table th,
-.ProseMirror table.ltr-table td,
 table[dir="ltr"] th,
-table[dir="ltr"] td {
+table[dir="ltr"] td,
+.ltr-table th,
+.ltr-table td {
   text-align: left !important;
   direction: ltr !important;
 }

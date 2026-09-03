@@ -76,14 +76,18 @@ const CustomTable = Table.extend({
     return {
       ...this.parent?.(),
       dir: {
-        default: 'rtl',
-        parseHTML: (element) => element.getAttribute('dir') || 'rtl',
+        default: null,
+        parseHTML: (element) => element.getAttribute('dir'),
         renderHTML: (attributes) => {
-          const dir = attributes.dir || 'rtl';
+          if (!attributes.dir) {
+            return {
+              style: 'width: 100%; border-collapse: collapse;',
+            };
+          }
           return {
-            dir: dir,
-            class: dir === 'ltr' ? 'ltr-table' : 'rtl-table',
-            style: `direction: ${dir} !important; width: 100%; border-collapse: collapse;`,
+            dir: attributes.dir,
+            class: attributes.dir === 'ltr' ? 'ltr-table' : 'rtl-table',
+            style: `direction: ${attributes.dir} !important; width: 100%; border-collapse: collapse;`,
           };
         },
       },
