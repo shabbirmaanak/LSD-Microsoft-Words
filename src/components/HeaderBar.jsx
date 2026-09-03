@@ -111,11 +111,30 @@ export default function HeaderBar({
 
         <button
           onClick={onExportDOCX}
-          className="flex items-center gap-1 bg-white text-[#106ebe] hover:bg-blue-50 px-2 py-1 rounded text-xs font-bold shadow-xs transition-colors"
-          title="Download as Microsoft Word (.docx)"
+          className="flex items-center gap-1 bg-blue-900/50 hover:bg-blue-900 text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs border border-blue-400/40 transition-colors"
+          title="Download as Editable Microsoft Word (.docx)"
         >
-          <FileText className="w-3.5 h-3.5 text-[#106ebe]" />
-          <span>.DOCX</span>
+          <FileText className="w-3.5 h-3.5 text-blue-200" />
+          <span className="hidden sm:inline">Word</span>
+          <span>.docx</span>
+        </button>
+
+        <button
+          onClick={onExportPDF}
+          className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs transition-colors"
+          title="Download Direct Print-Ready PDF (A4)"
+        >
+          <Download className="w-3.5 h-3.5 text-red-200" />
+          <span>PDF Print</span>
+        </button>
+
+        <button
+          onClick={onPrint}
+          className="flex items-center gap-1 bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded text-xs font-semibold shadow-xs transition-colors"
+          title="Direct System Print (Ctrl+P / Command+P)"
+        >
+          <Printer className="w-3.5 h-3.5 text-gray-300" />
+          <span className="hidden sm:inline">Print</span>
         </button>
 
         <button
@@ -124,22 +143,6 @@ export default function HeaderBar({
           title="Save Letter Draft"
         >
           <Save className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-        </button>
-
-        <button
-          onClick={onExportPDF}
-          className="p-1 sm:p-1.5 hover:bg-blue-700/60 rounded text-blue-100 hover:text-white transition-colors"
-          title="Export to PDF"
-        >
-          <Download className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
-        </button>
-
-        <button
-          onClick={onPrint}
-          className="p-1 sm:p-1.5 hover:bg-blue-700/60 rounded text-blue-100 hover:text-white transition-colors"
-          title="Print Document"
-        >
-          <Printer className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
         </button>
       </div>
     </header>

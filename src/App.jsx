@@ -285,7 +285,7 @@ export default function App() {
     setEditorText(text);
   };
 
-  // Export to PDF safely with dynamic import
+  // Export to PDF safely with dynamic import (Direct Print Ready)
   const handleExportPDF = async () => {
     const element = document.getElementById('letter-paper-canvas');
     if (!element) return;
@@ -293,16 +293,17 @@ export default function App() {
     try {
       const html2pdfModule = (await import('html2pdf.js')).default;
       const opt = {
-        margin:       0.3,
-        filename:     docTitle.replace(/\.(docx|doc|txt)$/i, '') + '.pdf',
-        image:        { type: 'jpeg', quality: 0.98 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false },
-        jsPDF:        { unit: 'in', format: 'a4', orientation: orientation }
+        margin:       [10, 10, 10, 10],
+        filename:     (docTitle || 'document').replace(/\.(docx|doc|txt)$/i, '') + '.pdf',
+        image:        { type: 'jpeg', quality: 0.99 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true, scrollY: 0 },
+        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
+        jsPDF:        { unit: 'mm', format: (pageSize || 'a4').toLowerCase(), orientation: orientation || 'portrait' }
       };
 
-      html2pdfModule().set(opt).from(element).save();
+      await html2pdfModule().set(opt).from(element).save();
     } catch (err) {
-      console.error('PDF export failed:', err);
+      console.error('PDF export failed, falling back to system print:', err);
       window.print();
     }
   };
