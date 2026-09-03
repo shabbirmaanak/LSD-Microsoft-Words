@@ -3,10 +3,10 @@ import {
   Bold, Italic, Underline, Strikethrough, Subscript, Superscript,
   AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Indent, Outdent,
-  Highlighter, Palette, RotateCcw, RotateCw,
-  Table, Calendar, User, FileText, Stamp, Image,
+  Highlighter, Palette, Undo2, Redo2,
+  Table, Calendar, FileText, Stamp, Image,
   Printer, Download, Plus, Layout, Type, Sparkles, Keyboard, Upload, Settings,
-  AArrowUp, AArrowDown, Eraser, CaseUpper
+  AArrowUp, AArrowDown, Eraser, ChevronDown, Check, Minus
 } from 'lucide-react';
 
 export default function Ribbon({
@@ -37,11 +37,11 @@ export default function Ribbon({
   onInsertBlock,
   onToggleArabicKeyboard
 }) {
-  const [activeTab, setActiveTab] = useState('home');
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showWatermarkPopover, setShowWatermarkPopover] = useState(false);
   const [customWatermarkInput, setCustomWatermarkInput] = useState(watermark || '');
+  const [fontSizeVal, setFontSizeVal] = useState(12);
 
   const colorPickerRef = useRef(null);
   const highlightPickerRef = useRef(null);
@@ -61,22 +61,22 @@ export default function Ribbon({
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   if (!editor) return null;
 
-  // Filter fonts to only show active ones, fallback to allAvailableFonts if empty
+  // Filter fonts to only show active ones (strictly LSD fonts)
   const filteredFonts = allAvailableFonts.filter((f) => activeFontValues.includes(f.value));
   const visibleFonts = filteredFonts.length > 0 ? filteredFonts : allAvailableFonts;
 
-  const fontSizes = ['10pt', '11pt', '12pt', '14pt', '16pt', '18pt', '22pt', '26pt', '32pt', '40pt'];
+  const fontSizes = [8, 9, 10, 11, 12, 14, 16, 18, 20, 24, 30, 36, 48, 60, 72];
 
   const colorSwatches = [
-    '#000000', '#106ebe', '#046a38', '#d13438', '#b4009e', 
-    '#323130', '#605e5c', '#0078d4', '#107c41', '#8a001a'
+    '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+    '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+    '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+    '#046a38', '#106ebe', '#107c41', '#8a001a', '#b4009e', '#323130', '#605e5c', '#0078d4', '#d13438', '#ffaa44'
   ];
 
   const highlightSwatches = [
@@ -85,1012 +85,227 @@ export default function Ribbon({
     { name: 'Cyan', color: '#b3e5fc' },
     { name: 'Pink', color: '#f8bbd0' },
     { name: 'Orange', color: '#ffe0b2' },
+    { name: 'Purple', color: '#e1bee7' },
+    { name: 'Red', color: '#ffcdd2' },
+    { name: 'Lime', color: '#e6ee9c' }
   ];
 
-  return (
-    <div className="select-none z-20 no-print" dir="ltr">
+  const changeFontSize = (delta) => {
+    const nextSize = Math.max(6, Math.min(96, fontSizeVal + delta));
+    setFontSizeVal(nextSize);
+    editor.chain().focus().setFontSize(`${nextSize}pt`).run();
+  };
 
-      {/* ==================== 1. MOBILE STACKED TOOLBAR CARD (Visible on Mobile < 768px) ==================== */}
-      <div className="block md:hidden bg-white border-b border-gray-300 p-2.5 shadow-xs space-y-2 select-none text-xs">
+  return (
+    <div className="select-none z-30 relative no-print bg-[#f9fbfd] py-1.5 border-b border-[#dadce0]/80" dir="ltr">
+      {/* Google Docs Floating Rounded Action Toolbar */}
+      <div className="bg-[#edf2fa] rounded-full mx-2 sm:mx-4 px-3 py-1 flex items-center gap-1 sm:gap-1.5 shadow-xs border border-[#dadce0]/60 overflow-x-auto text-xs text-gray-700">
         
-        {/* Row 1: Font Selector + Size Selector + LTR/RTL Toggle + Keyboard */}
-        <div className="flex items-center gap-1.5 justify-between">
+        {/* Undo / Redo */}
+        <button
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
+          className="p-1.5 hover:bg-black/10 rounded-full disabled:opacity-30 transition-colors text-gray-700"
+          title="Undo (Ctrl+Z)"
+        >
+          <Undo2 className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
+          className="p-1.5 hover:bg-black/10 rounded-full disabled:opacity-30 transition-colors text-gray-700"
+          title="Redo (Ctrl+Y)"
+        >
+          <Redo2 className="w-4 h-4" />
+        </button>
+
+        {/* Print */}
+        <button
+          onClick={onPrint}
+          className="p-1.5 hover:bg-black/10 rounded-full transition-colors text-gray-700"
+          title="Print (Ctrl+P)"
+        >
+          <Printer className="w-4 h-4" />
+        </button>
+
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Heading / Style Selector */}
+        <select
+          value={
+            editor.isActive('heading', { level: 1 }) ? 'h1' :
+            editor.isActive('heading', { level: 2 }) ? 'h2' :
+            editor.isActive('heading', { level: 3 }) ? 'h3' : 'p'
+          }
+          onChange={(e) => {
+            const val = e.target.value;
+            if (val === 'p') editor.chain().focus().setParagraph().run();
+            else if (val === 'h1') editor.chain().focus().toggleHeading({ level: 1 }).run();
+            else if (val === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
+            else if (val === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
+          }}
+          className="bg-transparent hover:bg-black/5 text-gray-800 font-medium px-2 py-1 rounded cursor-pointer focus:outline-none text-xs border border-transparent hover:border-gray-300"
+        >
+          <option value="p">Normal text</option>
+          <option value="h1">Title / Heading 1</option>
+          <option value="h2">Subtitle / Heading 2</option>
+          <option value="h3">Heading 3</option>
+        </select>
+
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* LSD Font Family Selector (Strictly LSD Fonts Only) */}
+        <div className="flex items-center">
           <select
             onChange={(e) => {
               const val = e.target.value;
-              if (val === '__manage__') {
-                onOpenFontManagerModal();
-              } else if (val) {
-                editor.chain().focus().setFontFamily(val).run();
-              }
+              editor.chain().focus().setFontFamily(val).run();
             }}
-            className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-xs font-semibold text-gray-900 flex-1 min-w-[110px]"
-            value={editor.getAttributes('textStyle').fontFamily || ''}
+            className="bg-transparent hover:bg-black/5 text-gray-900 font-semibold px-2 py-1 rounded cursor-pointer focus:outline-none text-xs max-w-[170px] border border-transparent hover:border-gray-300"
+            title="Lisan al Dawat Typography Fonts"
           >
-            <option value="" disabled>Select Font</option>
-            {visibleFonts.map((f) => (
-              <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
-                {f.name}
+            {visibleFonts.map((font) => (
+              <option key={font.value} value={font.value}>
+                {font.name}
               </option>
             ))}
-            <option value="__manage__">⚙️ Manage Fonts...</option>
           </select>
+        </div>
 
-          <select
-            onChange={(e) => {
-              editor.chain().focus().setFontSize(e.target.value).run();
-            }}
-            className="bg-gray-50 border border-gray-300 rounded px-1.5 py-1 text-xs font-semibold text-gray-900 w-16"
-            defaultValue="12pt"
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
+
+        {/* Font Size with Stepper (- / +) */}
+        <div className="flex items-center bg-white/70 rounded-md border border-gray-300 px-1 py-0.5">
+          <button
+            onClick={() => changeFontSize(-1)}
+            className="p-1 hover:bg-gray-200 rounded text-gray-700"
+            title="Decrease font size (Ctrl+Shift+,)"
           >
-            {fontSizes.map((s) => (
-              <option key={s} value={s}>{s}</option>
+            <Minus className="w-3 h-3" />
+          </button>
+          <select
+            value={fontSizeVal}
+            onChange={(e) => {
+              const sz = parseInt(e.target.value, 10);
+              setFontSizeVal(sz);
+              editor.chain().focus().setFontSize(`${sz}pt`).run();
+            }}
+            className="bg-transparent font-medium text-xs text-center w-9 cursor-pointer focus:outline-none"
+          >
+            {fontSizes.map((sz) => (
+              <option key={sz} value={sz}>{sz}</option>
             ))}
           </select>
-
-          {/* LTR / RTL Direction Toggle */}
-          <div className="flex items-center bg-gray-200/80 p-0.5 rounded border border-gray-300">
-            <button
-              onClick={() => { setTextDirection('ltr'); editor.chain().focus().setTextAlign('left').run(); }}
-              className={`px-2 py-0.5 rounded text-xs font-mono font-bold transition-all ${
-                textDirection === 'ltr' ? 'bg-[#106ebe] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-              title="Left-to-Right"
-            >
-              ›¶
-            </button>
-            <button
-              onClick={() => { setTextDirection('rtl'); editor.chain().focus().setTextAlign('right').run(); }}
-              className={`px-2 py-0.5 rounded text-xs font-mono font-bold transition-all ${
-                textDirection === 'rtl' ? 'bg-[#046a38] text-white shadow-xs' : 'text-gray-700 hover:bg-gray-100'
-              }`}
-              title="Right-to-Left (Lisan al Dawat / Arabic)"
-            >
-              ¶‹
-            </button>
-          </div>
-
-          {/* On-Screen Keyboard Button */}
           <button
-            onClick={onToggleArabicKeyboard}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white p-1.5 rounded transition-colors shadow-xs"
-            title="Open Arabic / Lisan al Dawat Keyboard"
+            onClick={() => changeFontSize(1)}
+            className="p-1 hover:bg-gray-200 rounded text-gray-700"
+            title="Increase font size (Ctrl+Shift+.)"
           >
-            <Keyboard className="w-4 h-4 text-emerald-100" />
+            <Plus className="w-3 h-3" />
           </button>
         </div>
 
-        {/* Row 2: Text Styles B I U S Palette Undo Redo */}
-        <div className="flex items-center gap-1 justify-between border-t border-b border-gray-100 py-1">
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => editor.chain().focus().toggleBold().run()}
-              className={`p-1.5 rounded font-bold text-xs ${
-                editor.isActive('bold') ? 'bg-blue-100 text-[#106ebe] font-bold border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Bold"
-            >
-              <Bold className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleItalic().run()}
-              className={`p-1.5 rounded text-xs ${
-                editor.isActive('italic') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Italic"
-            >
-              <Italic className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleUnderline().run()}
-              className={`p-1.5 rounded text-xs ${
-                editor.isActive('underline') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Underline"
-            >
-              <Underline className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleStrike().run()}
-              className={`p-1.5 rounded text-xs ${
-                editor.isActive('strike') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Strikethrough"
-            >
-              <Strikethrough className="w-4 h-4" />
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowColorPicker(!showColorPicker)}
-                className="p-1.5 rounded text-xs hover:bg-gray-100 text-gray-700"
-                title="Font Color"
-              >
-                <Palette className="w-4 h-4 text-blue-600" />
-              </button>
+        <div className="w-[1px] h-4 bg-gray-300 mx-0.5"></div>
 
-              {showColorPicker && (
-                <div className="absolute top-8 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-2 z-50 grid grid-cols-5 gap-1.5 w-36">
-                  {colorSwatches.map((color) => (
-                    <button
-                      key={color}
-                      onClick={() => {
-                        editor.chain().focus().setColor(color).run();
-                        setShowColorPicker(false);
-                      }}
-                      className="w-5 h-5 rounded border border-gray-300 hover:scale-110 transition-transform"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              )}
+        {/* Bold, Italic, Underline, Strike */}
+        <div className="flex items-center gap-0.5">
+          <button
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={`p-1.5 rounded transition-colors ${editor.isActive('bold') ? 'bg-[#d3e3fd] text-[#041e49] font-bold' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Bold (Ctrl+B)"
+          >
+            <Bold className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={`p-1.5 rounded transition-colors ${editor.isActive('italic') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Italic (Ctrl+I)"
+          >
+            <Italic className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={`p-1.5 rounded transition-colors ${editor.isActive('underline') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Underline (Ctrl+U)"
+          >
+            <Underline className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleStrike().run()}
+            className={`p-1.5 rounded transition-colors ${editor.isActive('strike') ? 'bg-[#d3e3fd] text-[#041e49]' : 'hover:bg-black/10 text-gray-700'}`}
+            title="Strikethrough"
+          >
+            <Strikethrough className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Text Color Popover */}
+        <div ref={colorPickerRef} className="relative">
+          <button
+            onClick={() => setShowColorPicker(!showColorPicker)}
+            className="p-1.5 hover:bg-black/10 rounded flex items-center gap-0.5 text-gray-700"
+            title="Text color"
+          >
+            <div className="flex flex-col items-center">
+              <span className="font-serif font-bold text-xs leading-none">A</span>
+              <div className="w-3.5 h-1 bg-black mt-0.5 rounded-full"></div>
             </div>
+            <ChevronDown className="w-2.5 h-2.5 text-gray-500" />
+          </button>
 
-            <div className="relative">
-              <button
-                onClick={() => {
-                  if (editor.isActive('highlight')) {
-                    editor.chain().focus().unsetHighlight().run();
-                  } else {
-                    setShowHighlightPicker(!showHighlightPicker);
-                  }
-                }}
-                className={`p-1.5 rounded text-xs transition-colors ${
-                  editor.isActive('highlight') ? 'bg-amber-200 text-amber-950 font-bold border border-amber-400' : 'hover:bg-gray-100 text-gray-700'
-                }`}
-                title="Highlight Text"
-              >
-                <Highlighter className="w-4 h-4 text-amber-500" />
-              </button>
+          {showColorPicker && (
+            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-50 grid grid-cols-10 gap-1 min-w-[240px]">
+              {colorSwatches.map((color) => (
+                <button
+                  key={color}
+                  onClick={() => {
+                    editor.chain().focus().setColor(color).run();
+                    setShowColorPicker(false);
+                  }}
+                  className="w-4.5 h-4.5 rounded-full border border-gray-300 hover:scale-125 transition-transform"
+                  style={{ backgroundColor: color }}
+                  title={color}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
-              {showHighlightPicker && (
-                <div className="absolute top-8 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-2 z-50 flex flex-col gap-1.5 w-36">
-                  <span className="text-[10px] font-bold text-gray-500">Highlight</span>
-                  <div className="flex items-center gap-1.5">
-                    {highlightSwatches.map((item) => (
-                      <button
-                        key={item.color}
-                        onClick={() => {
-                          editor.chain().focus().setHighlight({ color: item.color }).run();
-                          setShowHighlightPicker(false);
-                        }}
-                        className="w-5 h-5 rounded-full border border-gray-400 hover:scale-110 shadow-xs"
-                        style={{ backgroundColor: item.color }}
-                        title={item.name}
-                      />
-                    ))}
-                  </div>
+        {/* Highlight Color Popover */}
+        <div ref={highlightPickerRef} className="relative">
+          <button
+            onClick={() => setShowHighlightPicker(!showHighlightPicker)}
+            className={`p-1.5 rounded flex items-center gap-0.5 transition-colors ${
+              editor.isActive('highlight') ? 'bg-amber-200 text-amber-950 font-bold' : 'hover:bg-black/10 text-gray-700'
+            }`}
+            title="Highlight color"
+          >
+            <Highlighter className="w-4 h-4 text-amber-500" />
+            <ChevronDown className="w-2.5 h-2.5 text-gray-500" />
+          </button>
+
+          {showHighlightPicker && (
+            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-50 flex flex-col gap-2 min-w-[160px]">
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highlight Color</span>
+              <div className="grid grid-cols-4 gap-1.5">
+                {highlightSwatches.map((item) => (
                   <button
+                    key={item.color}
                     onClick={() => {
-                      editor.chain().focus().unsetHighlight().run();
+                      editor.chain().focus().setHighlight({ color: item.color }).run();
                       setShowHighlightPicker(false);
                     }}
-                    className="text-[10px] text-red-600 hover:bg-red-50 py-0.5 rounded text-left font-medium border-t border-gray-100"
-                  >
-                    Clear Highlight
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => editor.chain().focus().undo().run()}
-              disabled={!editor.can().undo()}
-              className="p-1.5 rounded text-xs hover:bg-gray-100 disabled:opacity-30"
-              title="Undo"
-            >
-              <RotateCcw className="w-4 h-4 text-gray-700" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().redo().run()}
-              disabled={!editor.can().redo()}
-              className="p-1.5 rounded text-xs hover:bg-gray-100 disabled:opacity-30"
-              title="Redo"
-            >
-              <RotateCw className="w-4 h-4 text-gray-700" />
-            </button>
-          </div>
-        </div>
-
-        {/* Row 3: Lists & Alignments */}
-        <div className="flex items-center gap-1 justify-between">
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => editor.chain().focus().toggleBulletList().run()}
-              className={`p-1.5 rounded ${
-                editor.isActive('bulletList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Bullet List"
-            >
-              <List className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().toggleOrderedList().run()}
-              className={`p-1.5 rounded ${
-                editor.isActive('orderedList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Numbered List"
-            >
-              <ListOrdered className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-0.5">
-            <button
-              onClick={() => editor.chain().focus().setTextAlign('left').run()}
-              className={`p-1.5 rounded ${
-                editor.isActive({ textAlign: 'left' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Align Left"
-            >
-              <AlignLeft className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().setTextAlign('center').run()}
-              className={`p-1.5 rounded ${
-                editor.isActive({ textAlign: 'center' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Align Center"
-            >
-              <AlignCenter className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().setTextAlign('right').run()}
-              className={`p-1.5 rounded ${
-                editor.isActive({ textAlign: 'right' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Align Right"
-            >
-              <AlignRight className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-              className={`p-1.5 rounded ${
-                editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-100 text-gray-700'
-              }`}
-              title="Justify"
-            >
-              <AlignJustify className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Hidden Image File Input */}
-        <input
-          type="file"
-          id="image-upload-input"
-          accept="image/*"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (event) => {
-                editor.chain().focus().setImage({ src: event.target.result }).run();
-              };
-              reader.readAsDataURL(file);
-            }
-          }}
-        />
-
-        {/* Row 4: Page Layout & Actions (Landscape, Print, PDF, Insert Image, Table) */}
-        <div className="flex items-center gap-1.5 justify-between pt-1 border-t border-gray-100 overflow-x-auto no-scrollbar">
-          <button
-            onClick={() => setOrientation(orientation === 'portrait' ? 'landscape' : 'portrait')}
-            className={`px-2 py-1 rounded text-[11px] font-bold border transition-colors shadow-2xs ${
-              orientation === 'landscape' ? 'bg-indigo-600 text-white border-indigo-700' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-            }`}
-            title="Toggle Page Orientation (Portrait / Landscape)"
-          >
-            {orientation === 'landscape' ? '📐 Landscape' : '📄 Portrait'}
-          </button>
-
-          <button
-            onClick={() => document.getElementById('image-upload-input')?.click()}
-            className="bg-purple-700 hover:bg-purple-800 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
-            title="Insert Image from device"
-          >
-            <Image className="w-3.5 h-3.5 text-purple-200" />
-            <span>Image</span>
-          </button>
-
-          <button
-            onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-            className="bg-indigo-700 hover:bg-indigo-800 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
-            title="Insert 3x3 Table"
-          >
-            <Table className="w-3.5 h-3.5 text-indigo-200" />
-            <span>Table</span>
-          </button>
-
-          <button
-            onClick={onExportDOCX}
-            className="bg-[#106ebe] hover:bg-blue-800 text-white px-2 py-1 rounded text-[11px] font-bold flex items-center gap-1 shadow-xs"
-            title="Download as Word Document (.docx)"
-          >
-            <FileText className="w-3.5 h-3.5 text-blue-200" />
-            <span>.DOCX</span>
-          </button>
-
-          <button
-            onClick={onExportPDF}
-            className="bg-blue-700 hover:bg-blue-800 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
-            title="Export as PDF"
-          >
-            <Download className="w-3.5 h-3.5 text-blue-200" />
-            <span>PDF</span>
-          </button>
-
-          <button
-            onClick={onPrint}
-            className="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 shadow-xs"
-            title="Print Letter Document"
-          >
-            <Printer className="w-3.5 h-3.5 text-gray-200" />
-            <span>Print</span>
-          </button>
-
-          <button
-            onClick={() => onInsertBlock('bismillah')}
-            className="bg-emerald-800 hover:bg-emerald-900 text-white px-2 py-1 rounded text-[10px] font-serif font-bold whitespace-nowrap shadow-xs"
-          >
-            بِسْمِ اللَّهِ
-          </button>
-        </div>
-      </div>
-
-      {/* ==================== 2. DESKTOP FULL RIBBON TAB (Visible on Desktop >= 768px) ==================== */}
-      <div className="hidden md:block bg-[#f3f2f1] border-b border-gray-300 relative z-30">
-        {/* Ribbon Navigation Tabs */}
-        <div className="flex items-center px-4 bg-[#e1dfdd]/40 border-b border-gray-300/80 text-xs">
-          <div className="flex items-center">
-            {['file', 'home', 'insert', 'layout', 'templates'].map((tab) => (
+                    className="w-6 h-6 rounded-full border border-gray-300 hover:scale-115 transition-transform shadow-2xs"
+                    style={{ backgroundColor: item.color }}
+                    title={item.name}
+                  />
+                ))}
+              </div>
               <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-4 py-1.5 font-semibold uppercase tracking-wider transition-all border-b-2 ${
-                  activeTab === tab
-                    ? 'bg-white border-[#106ebe] text-[#106ebe] shadow-sm'
-                    : 'border-transparent text-gray-700 hover:bg-gray-200/80 hover:text-gray-900'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Ribbon Content Panels (overflow-visible to prevent clipping popups) */}
-        <div className="p-2 px-4 flex items-center gap-3 min-h-[58px] overflow-visible text-xs relative z-30">
-          
-          {/* HOME TAB */}
-          {activeTab === 'home' && (
-            <div className="flex items-center gap-3">
-              {/* Undo / Redo group */}
-              <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
-                <button
-                  onClick={() => editor.chain().focus().undo().run()}
-                  disabled={!editor.can().undo()}
-                  className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-30 transition-colors"
-                  title="Undo (Ctrl+Z)"
-                >
-                  <RotateCcw className="w-4 h-4 text-gray-700" />
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().redo().run()}
-                  disabled={!editor.can().redo()}
-                  className="p-1.5 hover:bg-gray-200 rounded disabled:opacity-30 transition-colors"
-                  title="Redo (Ctrl+Y)"
-                >
-                  <RotateCw className="w-4 h-4 text-gray-700" />
-                </button>
-              </div>
-
-              {/* Font Family & Size Selector */}
-              <div className="flex items-center gap-1 border-r border-gray-300 pr-3">
-                <select
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === '__manage__') {
-                      onOpenFontManagerModal();
-                    } else if (val) {
-                      editor.chain().focus().setFontFamily(val).run();
-                    }
-                  }}
-                  className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600 font-semibold text-gray-900 min-w-[160px]"
-                  value={editor.getAttributes('textStyle').fontFamily || ''}
-                >
-                  <option value="" disabled>Select Font</option>
-                  {visibleFonts.map((f) => (
-                    <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
-                      {f.name}
-                    </option>
-                  ))}
-                  <option value="__manage__" className="font-bold text-blue-600 bg-blue-50">
-                    ⚙️ Manage Font List...
-                  </option>
-                </select>
-
-                <select
-                  onChange={(e) => {
-                    editor.chain().focus().setFontSize(e.target.value).run();
-                  }}
-                  className="bg-white border border-gray-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-600 font-semibold text-gray-900"
-                  defaultValue="12pt"
-                >
-                  {fontSizes.map((s) => (
-                    <option key={s} value={s}>{s}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Font Formatting: B I U S Sub Sup */}
-              <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
-                <button
-                  onClick={() => editor.chain().focus().toggleBold().run()}
-                  className={`p-1.5 rounded transition-colors ${
-                    editor.isActive('bold') ? 'bg-blue-100 text-[#106ebe] font-bold border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Bold (Ctrl+B)"
-                >
-                  <Bold className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => editor.chain().focus().toggleItalic().run()}
-                  className={`p-1.5 rounded transition-colors ${
-                    editor.isActive('italic') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Italic (Ctrl+I)"
-                >
-                  <Italic className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => editor.chain().focus().toggleUnderline().run()}
-                  className={`p-1.5 rounded transition-colors ${
-                    editor.isActive('underline') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Underline (Ctrl+U)"
-                >
-                  <Underline className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => editor.chain().focus().toggleStrike().run()}
-                  className={`p-1.5 rounded transition-colors ${
-                    editor.isActive('strike') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Strikethrough"
-                >
-                  <Strikethrough className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => editor.chain().focus().toggleSubscript().run()}
-                  className={`p-1.5 rounded transition-colors ${
-                    editor.isActive('subscript') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Subscript"
-                >
-                  <Subscript className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => editor.chain().focus().toggleSuperscript().run()}
-                  className={`p-1.5 rounded transition-colors ${
-                    editor.isActive('superscript') ? 'bg-blue-100 text-[#106ebe] border border-blue-300' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Superscript"
-                >
-                  <Superscript className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Color Palette */}
-              <div ref={colorPickerRef} className="flex items-center gap-1 border-r border-gray-300 pr-3 relative">
-                <button
-                  onClick={() => setShowColorPicker(!showColorPicker)}
-                  className="p-1.5 hover:bg-gray-200 rounded flex items-center gap-1 text-gray-700"
-                  title="Font Color"
-                >
-                  <Palette className="w-4 h-4 text-blue-600" />
-                </button>
-
-                {showColorPicker && (
-                  <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded shadow-lg p-2 z-50 grid grid-cols-5 gap-1.5">
-                    {colorSwatches.map((color) => (
-                      <button
-                        key={color}
-                        onClick={() => {
-                          editor.chain().focus().setColor(color).run();
-                          setShowColorPicker(false);
-                        }}
-                        className="w-5 h-5 rounded border border-gray-300 hover:scale-110 transition-transform"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Text Highlight Color Tool */}
-              <div ref={highlightPickerRef} className="flex items-center gap-0.5 border-r border-gray-300 pr-3 relative">
-                <button
-                  onClick={() => {
-                    if (editor.isActive('highlight')) {
-                      editor.chain().focus().unsetHighlight().run();
-                    } else {
-                      setShowHighlightPicker(!showHighlightPicker);
-                    }
-                  }}
-                  className={`p-1.5 rounded flex items-center gap-1 transition-colors ${
-                    editor.isActive('highlight') ? 'bg-amber-200 text-amber-950 font-bold border border-amber-400' : 'hover:bg-gray-200 text-gray-700'
-                  }`}
-                  title="Highlight Selected Text (Click to toggle / pick color)"
-                >
-                  <Highlighter className="w-4 h-4 text-amber-500" />
-                </button>
-                <button
-                  onClick={() => setShowHighlightPicker(!showHighlightPicker)}
-                  className="text-[9px] text-gray-500 hover:text-gray-800 p-0.5 hover:bg-gray-200 rounded"
-                  title="Choose Highlight Color"
-                >
-                  ▼
-                </button>
-
-                {showHighlightPicker && (
-                  <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-lg shadow-xl p-2.5 z-50 flex flex-col gap-1.5 min-w-[140px]">
-                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highlight Color</span>
-                    <div className="flex items-center gap-1.5">
-                      {highlightSwatches.map((item) => (
-                        <button
-                          key={item.color}
-                          onClick={() => {
-                            editor.chain().focus().setHighlight({ color: item.color }).run();
-                            setShowHighlightPicker(false);
-                          }}
-                          className="w-5 h-5 rounded-full border border-gray-400 hover:scale-125 transition-transform shadow-xs"
-                          style={{ backgroundColor: item.color }}
-                          title={item.name}
-                        />
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => {
-                        editor.chain().focus().unsetHighlight().run();
-                        setShowHighlightPicker(false);
-                      }}
-                      className="text-[11px] text-red-600 hover:bg-red-50 py-0.5 px-1 rounded text-left font-medium border-t border-gray-100 mt-1"
-                    >
-                      ✕ Clear Highlight
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Alignment */}
-              <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
-                <button
-                  onClick={() => editor.chain().focus().setTextAlign('left').run()}
-                  className={`p-1.5 rounded ${editor.isActive({ textAlign: 'left' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
-                  title="Align Left"
-                >
-                  <AlignLeft className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().setTextAlign('center').run()}
-                  className={`p-1.5 rounded ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
-                  title="Align Center"
-                >
-                  <AlignCenter className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().setTextAlign('right').run()}
-                  className={`p-1.5 rounded ${editor.isActive({ textAlign: 'right' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
-                  title="Align Right"
-                >
-                  <AlignRight className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().setTextAlign('justify').run()}
-                  className={`p-1.5 rounded ${editor.isActive({ textAlign: 'justify' }) ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
-                  title="Justify"
-                >
-                  <AlignJustify className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* Lists */}
-              <div className="flex items-center gap-0.5 border-r border-gray-300 pr-3">
-                <button
-                  onClick={() => editor.chain().focus().toggleBulletList().run()}
-                  className={`p-1.5 rounded ${editor.isActive('bulletList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
-                  title="Bullet List"
-                >
-                  <List className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => editor.chain().focus().toggleOrderedList().run()}
-                  className={`p-1.5 rounded ${editor.isActive('orderedList') ? 'bg-blue-100 text-[#106ebe]' : 'hover:bg-gray-200 text-gray-700'}`}
-                  title="Numbered List"
-                >
-                  <ListOrdered className="w-4 h-4" />
-                </button>
-              </div>
-
-              {/* LTR & RTL Paragraph Direction Buttons */}
-              <div className="flex items-center gap-1 bg-gray-200/80 p-1 rounded-md border border-gray-300">
-                <button
-                  onClick={() => {
-                    setTextDirection('ltr');
-                    editor.chain().focus().setTextAlign('left').run();
-                  }}
-                  className={`flex items-center justify-center px-2 py-1 rounded text-xs font-bold transition-all shadow-2xs ${
-                    textDirection === 'ltr'
-                      ? 'bg-[#106ebe] text-white ring-1 ring-blue-700 shadow-sm'
-                      : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-300'
-                  }`}
-                  title="Left-to-Right Text Direction (>¶)"
-                >
-                  <span className="font-mono text-sm tracking-tighter">›¶</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    setTextDirection('rtl');
-                    editor.chain().focus().setTextAlign('right').run();
-                  }}
-                  className={`flex items-center justify-center px-2 py-1 rounded text-xs font-bold transition-all shadow-2xs ${
-                    textDirection === 'rtl'
-                      ? 'bg-[#046a38] text-white ring-1 ring-emerald-700 shadow-sm'
-                      : 'bg-white hover:bg-gray-100 text-gray-800 border border-gray-300'
-                  }`}
-                  title="Right-to-Left Text Direction (¶< - Lisan al Dawat / Arabic)"
-                >
-                  <span className="font-mono text-sm tracking-tighter">¶‹</span>
-                </button>
-              </div>
-
-              {/* Arabic Keyboard Toggle */}
-              <button
-                onClick={onToggleArabicKeyboard}
-                className="flex items-center gap-1 bg-emerald-700 hover:bg-emerald-800 text-white px-2.5 py-1 rounded text-xs font-bold shadow-xs transition-colors"
-                title="Open On-Screen Arabic & Lisan al Dawat Virtual Keyboard"
-              >
-                <Keyboard className="w-3.5 h-3.5 text-emerald-200" />
-                <span>Keyboard</span>
-              </button>
-            </div>
-          )}
-
-          {/* INSERT TAB */}
-          {activeTab === 'insert' && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => document.getElementById('image-upload-input')?.click()}
-                className="flex items-center gap-1.5 bg-purple-700 hover:bg-purple-800 text-white px-3 py-1.5 rounded font-bold shadow-sm transition-colors"
-                title="Insert Image from device"
-              >
-                <Image className="w-4 h-4 text-purple-200" />
-                <span>Insert Image</span>
-              </button>
-
-              <button
-                onClick={onInsertDate}
-                className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
-              >
-                <Calendar className="w-4 h-4 text-blue-600" />
-                <span>Insert Date</span>
-              </button>
-
-              <button
-                onClick={() => onInsertBlock('bismillah')}
-                className="flex items-center gap-1.5 bg-emerald-800 hover:bg-emerald-900 text-white font-serif px-3 py-1.5 rounded text-xs font-bold shadow-sm"
-              >
-                <span>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
-              </button>
-
-              <button
-                onClick={() => editor.chain().focus().setHorizontalRule().run()}
-                className="flex items-center gap-1.5 bg-white border border-gray-300 hover:bg-gray-50 px-3 py-1.5 rounded font-medium text-gray-700 shadow-sm"
-              >
-                <span>— Horizontal Line</span>
-              </button>
-
-              <button
-                onClick={() => editor.chain().focus().insertContent('<div class="page-break" style="page-break-after: always; break-after: page; height: 16px;"></div><p></p>').run()}
-                className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-semibold shadow-xs transition-colors"
-                title="Insert Page Break (Force content to next page)"
-              >
-                <FileText className="w-4 h-4 text-blue-100" />
-                <span>Page Break</span>
-              </button>
-
-              {/* Table Management Tools */}
-              <div className="flex items-center gap-1 bg-indigo-50/90 border border-indigo-200 p-1 rounded-lg">
-                <button
-                  onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-                  className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 py-1 rounded text-xs font-semibold shadow-xs transition-colors"
-                >
-                  <Table className="w-4 h-4 text-indigo-100" />
-                  <span>Table (3x3)</span>
-                </button>
-
-                {editor.isActive('table') && (
-                  <>
-                    <div className="w-[1px] h-4 bg-indigo-300 mx-0.5"></div>
-                    <button
-                      onClick={() => editor.chain().focus().addRowAfter().run()}
-                      className="bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-900 px-2 py-0.5 rounded text-xs font-medium transition-colors"
-                      title="Add Row Below"
-                    >
-                      + Row
-                    </button>
-                    <button
-                      onClick={() => editor.chain().focus().addColumnAfter().run()}
-                      className="bg-white hover:bg-indigo-100 border border-indigo-300 text-indigo-900 px-2 py-0.5 rounded text-xs font-medium transition-colors"
-                      title="Add Column Right"
-                    >
-                      + Col
-                    </button>
-                    <button
-                      onClick={() => {
-                        const { state, dispatch } = editor.view;
-                        const { tr, selection } = state;
-                        let tablePos = null;
-                        let tableNode = null;
-
-                        state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
-                          if (node.type.name === 'table') {
-                            tablePos = pos;
-                            tableNode = node;
-                            return false;
-                          }
-                        });
-
-                        if (tableNode && tablePos !== null) {
-                          const newRows = [];
-                          tableNode.forEach((rowNode) => {
-                            if (rowNode.type.name === 'tableRow') {
-                              const cells = [];
-                              rowNode.forEach((cellNode) => {
-                                cells.push(cellNode);
-                              });
-                              cells.reverse();
-                              newRows.push(rowNode.type.create(rowNode.attrs, cells));
-                            }
-                          });
-
-                          const newTable = tableNode.type.create(tableNode.attrs, newRows);
-                          const transaction = tr.replaceWith(tablePos, tablePos + tableNode.nodeSize, newTable);
-                          dispatch(transaction);
-                        }
-                      }}
-                      className="bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 px-2 py-0.5 rounded text-xs font-bold transition-colors shadow-2xs"
-                      title="Reverse Columns in this Table (اعكس ترتيب الأعمدة)"
-                    >
-                      ⇄ Reverse Columns
-                    </button>
-                    <button
-                      onClick={() => editor.chain().focus().deleteRow().run()}
-                      className="bg-white hover:bg-red-100 border border-red-200 text-red-700 px-2 py-0.5 rounded text-xs font-medium transition-colors"
-                      title="Delete Current Row"
-                    >
-                      - Row
-                    </button>
-                    <button
-                      onClick={() => editor.chain().focus().deleteColumn().run()}
-                      className="bg-white hover:bg-red-100 border border-red-200 text-red-700 px-2 py-0.5 rounded text-xs font-medium transition-colors"
-                      title="Delete Current Column"
-                    >
-                      - Col
-                    </button>
-                    <button
-                      onClick={() => editor.chain().focus().deleteTable().run()}
-                      className="bg-red-600 hover:bg-red-700 text-white px-2 py-0.5 rounded text-xs font-bold transition-colors"
-                      title="Delete Entire Table"
-                    >
-                      Delete Table
-                    </button>
-                  </>
-                )}
-              </div>
-
-              {/* Modern Custom Watermark Popover Tool */}
-              <div ref={watermarkPopoverRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setShowWatermarkPopover(!showWatermarkPopover)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border font-semibold text-xs shadow-xs transition-colors ${
-                    watermark ? 'bg-red-50 border-red-300 text-red-900' : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-50'
-                  }`}
-                  title="Add or Customize Watermark"
-                >
-                  <Stamp className={`w-4 h-4 ${watermark ? 'text-red-600' : 'text-gray-500'}`} />
-                  <span>Watermark:</span>
-                  <span className="font-bold max-w-[100px] truncate text-red-700">
-                    {watermark || 'None'}
-                  </span>
-                  <span className="text-[10px] text-gray-500">▼</span>
-                </button>
-
-                {showWatermarkPopover && (
-                  <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-3 z-50 w-72 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
-                      <span className="font-bold text-gray-900 text-xs flex items-center gap-1.5">
-                        <Stamp className="w-3.5 h-3.5 text-red-600" />
-                        <span>Watermark Settings</span>
-                      </span>
-                      {watermark && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setWatermark('');
-                            setCustomWatermarkInput('');
-                            setShowWatermarkPopover(false);
-                          }}
-                          className="text-[10px] text-red-600 hover:underline font-bold"
-                        >
-                          Remove
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Custom Text Input */}
-                    <div>
-                      <label className="block text-[11px] font-semibold text-gray-700 mb-1">
-                        Custom Watermark Text:
-                      </label>
-                      <div className="flex items-center gap-1.5">
-                        <input
-                          type="text"
-                          placeholder="Type custom text (e.g. Al-Jamea)..."
-                          value={customWatermarkInput}
-                          onChange={(e) => setCustomWatermarkInput(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && customWatermarkInput.trim()) {
-                              setWatermark(customWatermarkInput.trim());
-                              setShowWatermarkPopover(false);
-                            }
-                          }}
-                          className="flex-1 px-2.5 py-1.5 border border-gray-300 rounded text-xs text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (customWatermarkInput.trim()) {
-                              setWatermark(customWatermarkInput.trim());
-                              setShowWatermarkPopover(false);
-                            }
-                          }}
-                          disabled={!customWatermarkInput.trim()}
-                          className="bg-[#106ebe] hover:bg-blue-700 disabled:opacity-40 text-white font-bold px-2.5 py-1.5 rounded text-xs transition-colors shadow-2xs shrink-0"
-                        >
-                          Apply
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Quick Presets */}
-                    <div>
-                      <span className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">
-                        Or Pick Fast Preset:
-                      </span>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {[
-                          { label: 'DRAFT', val: 'DRAFT' },
-                          { label: 'CONFIDENTIAL', val: 'CONFIDENTIAL' },
-                          { label: 'URGENT', val: 'URGENT' },
-                          { label: 'OFFICIAL', val: 'OFFICIAL' },
-                          { label: 'مسودة (Draft)', val: 'مسودة' },
-                          { label: 'سري للغاية', val: 'سري للغاية' },
-                        ].map((item) => (
-                          <button
-                            key={item.val}
-                            type="button"
-                            onClick={() => {
-                              setWatermark(item.val);
-                              setCustomWatermarkInput(item.val);
-                              setShowWatermarkPopover(false);
-                            }}
-                            className={`px-2 py-1 rounded text-[11px] font-semibold border text-left truncate transition-colors ${
-                              watermark === item.val
-                                ? 'bg-red-50 border-red-300 text-red-800 font-bold'
-                                : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                            }`}
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* LAYOUT TAB */}
-          {activeTab === 'layout' && (
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-600">Page Size:</span>
-                <select
-                  value={pageSize}
-                  onChange={(e) => setPageSize(e.target.value)}
-                  className="bg-white border border-gray-300 rounded px-2.5 py-1 font-semibold text-xs text-gray-800 shadow-sm focus:ring-1 focus:ring-blue-500 cursor-pointer"
-                >
-                  <option value="A4">A4 (210 × 297 mm) — Default</option>
-                  <option value="Letter">Letter (8.5 × 11 in)</option>
-                  <option value="Legal">Legal (8.5 × 14 in)</option>
-                  <option value="A5">A5 (148 × 210 mm)</option>
-                </select>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-600">Margins:</span>
-                <div className="flex bg-white border border-gray-300 rounded p-0.5 shadow-sm">
-                  {['normal', 'narrow', 'wide'].map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setMargins(m)}
-                      className={`px-2.5 py-1 rounded capitalize font-medium ${
-                        margins === m ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
-                      }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-600">Orientation:</span>
-                <div className="flex bg-white border border-gray-300 rounded p-0.5 shadow-sm">
-                  <button
-                    onClick={() => setOrientation('portrait')}
-                    className={`px-2.5 py-1 rounded capitalize font-medium ${
-                      orientation === 'portrait' ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    Portrait
-                  </button>
-                  <button
-                    onClick={() => setOrientation('landscape')}
-                    className={`px-2.5 py-1 rounded capitalize font-medium ${
-                      orientation === 'landscape' ? 'bg-blue-100 text-[#106ebe] font-bold' : 'hover:bg-gray-100 text-gray-700'
-                    }`}
-                  >
-                    Landscape
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TEMPLATES TAB */}
-          {activeTab === 'templates' && (
-            <div className="flex items-center gap-3">
-              <button
-                onClick={onOpenTemplateModal}
-                className="flex items-center gap-2 bg-[#106ebe] hover:bg-blue-700 text-white font-medium px-4 py-1.5 rounded shadow-sm"
-              >
-                <Layout className="w-4 h-4 text-blue-200" />
-                <span>Browse All Templates</span>
-              </button>
-              <span className="text-gray-400">|</span>
-              <span className="text-gray-600 font-bold">Quick Pick:</span>
-              <button
-                onClick={() => onInsertBlock('template-formal')}
-                className="bg-white border border-gray-300 hover:bg-gray-50 px-2.5 py-1 rounded text-gray-700 font-medium"
-              >
-                Formal Business
-              </button>
-              <button
-                onClick={() => onInsertBlock('template-lisan-arzi')}
-                className="bg-emerald-50 border border-emerald-300 hover:bg-emerald-100 px-3 py-1 rounded text-emerald-900 font-bold font-serif"
+                onClick={() => {
+                  editor.chain().focus().unsetHighlight().run();
+                  setShowHighlightPicker(false);
+                }}
               >
                 عريضة لسان الدعوة (Arzi)
               </button>

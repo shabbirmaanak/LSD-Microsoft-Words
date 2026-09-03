@@ -1,8 +1,13 @@
-// Pre-installed Default Fonts Configuration for LSD-Microsoft Word Studio
+// Pre-installed Default Fonts Configuration for LSD Google Docs Studio
 // Bundled fonts stored directly inside public/fonts/ and loaded natively via CSS @font-face
 
 export const preinstalledFonts = [
-  // Lisan al Dawat Fonts
+  {
+    name: 'Kanz-al-Lulu (الافتراضي)',
+    value: 'Kanz-al-Lulu, Amiri, serif',
+    category: 'Lisan al Dawat',
+    isPreinstalled: true,
+  },
   {
     name: 'Al-Fatemi (لسان الدعوة)',
     value: 'Al-Fatemi, Amiri, serif',
@@ -16,53 +21,21 @@ export const preinstalledFonts = [
     isPreinstalled: true,
   },
   {
-    name: 'Kanz-al-Lulu',
-    value: 'Kanz-al-Lulu, Amiri, serif',
-    category: 'Lisan al Dawat',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Kanz-al-Marjaan',
+    name: 'Kanz-al-Marjaan (مرجان)',
     value: 'Kanz-al-Marjaan, Amiri, serif',
     category: 'Lisan al Dawat',
     isPreinstalled: true,
   },
   {
-    name: 'Kanz-al-Yaqoot',
+    name: 'Kanz-al-Yaqoot (ياقوت)',
     value: 'Kanz-al-Yaqoot, Amiri, serif',
     category: 'Lisan al Dawat',
     isPreinstalled: true,
   },
   {
-    name: 'Amiri',
+    name: 'Amiri (خط النسخ)',
     value: 'Amiri, serif',
     category: 'Lisan al Dawat & Arabic',
-    isPreinstalled: true,
-  },
-
-  // Standard Office Typography
-  {
-    name: 'Calibri',
-    value: 'Calibri, sans-serif',
-    category: 'Standard Office',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Segoe UI',
-    value: 'Segoe UI, sans-serif',
-    category: 'Standard Office',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Arial',
-    value: 'Arial, sans-serif',
-    category: 'Standard Office',
-    isPreinstalled: true,
-  },
-  {
-    name: 'Times New Roman',
-    value: 'Times New Roman, serif',
-    category: 'Standard Office',
     isPreinstalled: true,
   }
 ];

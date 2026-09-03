@@ -41,29 +41,30 @@
 
 @layer base {
   body {
-    font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Kanz-al-Marjaan', 'Kanz-al-Yaqoot', 'Amiri', 'Segoe UI', Calibri, Arial, serif;
-    color: #323130;
+    font-family: 'Kanz-al-Lulu', 'Al-Fatemi', 'Al-Kanz', 'Kanz-al-Marjaan', 'Kanz-al-Yaqoot', 'Amiri', serif;
+    color: #202124;
+    background-color: #f9fbfd;
   }
 }
 
 /* Custom Ruler styling */
 .ruler-tick {
-  border-left: 1px solid #a19f9d;
+  border-left: 1px solid #dadce0;
   height: 4px;
 }
 .ruler-tick-major {
-  border-left: 1px solid #605e5c;
+  border-left: 1px solid #70757a;
   height: 8px;
 }
 
-/* A4 Paper Dimensions */
+/* Google Docs A4 Paper Dimensions & Shadow */
 .a4-paper {
   width: 100%;
   max-width: 794px; /* 210mm at 96 DPI */
   min-height: 1123px; /* 297mm at 96 DPI */
   position: relative;
   background-color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px 0 rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
   transition: all 0.2s ease-in-out;
 }
 

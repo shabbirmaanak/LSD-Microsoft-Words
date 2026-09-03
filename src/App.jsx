@@ -487,12 +487,13 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-gray-100 font-office" dir="ltr">
       
-      {/* 1. Top Header Bar */}
+      {/* 1. Google Docs Top Header Bar & Menus */}
       <HeaderBar
         docTitle={docTitle}
         setDocTitle={setDocTitle}
         isSaving={isSaving}
         onSave={handleSave}
+        onNewLetter={handleNewLetter}
         onOpenSavedModal={() => setIsSavedModalOpen(true)}
         onOpenTemplateModal={() => setIsTemplateModalOpen(true)}
         onExportPDF={handleExportPDF}
@@ -500,6 +501,13 @@ export default function App() {
         onPrint={handlePrint}
         onToggleHelperDrawer={() => setIsHelperOpen(!isHelperOpen)}
         isHelperOpen={isHelperOpen}
+        onToggleArabicKeyboard={() => setIsArabicKeyboardOpen(!isArabicKeyboardOpen)}
+        isArabicKeyboardOpen={isArabicKeyboardOpen}
+        onOpenFontManagerModal={() => setIsFontManagerModalOpen(true)}
+        onOpenAdminModal={() => setIsAdminOpen(true)}
+        editorInstance={editorInstance}
+        zoomLevel={zoomLevel}
+        setZoomLevel={setZoomLevel}
       />
 
       {/* 2. Office Ribbon Toolbar */}
