@@ -471,14 +471,52 @@ export default function A4EditorCanvas({
                 </button>
                 <button
                   onClick={() => {
+                    const { state, dispatch } = editor.view;
+                    const { tr, selection } = state;
+                    let tablePos = null;
+                    let tableNode = null;
+
+                    state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
+                      if (node.type.name === 'table') {
+                        tablePos = pos;
+                        tableNode = node;
+                        return false;
+                      }
+                    });
+
+                    if (tableNode && tablePos !== null) {
+                      const newRows = [];
+                      tableNode.forEach((rowNode) => {
+                        if (rowNode.type.name === 'tableRow') {
+                          const cells = [];
+                          rowNode.forEach((cellNode) => {
+                            cells.push(cellNode);
+                          });
+                          cells.reverse();
+                          newRows.push(rowNode.type.create(rowNode.attrs, cells));
+                        }
+                      });
+
+                      const newTable = tableNode.type.create(tableNode.attrs, newRows);
+                      const transaction = tr.replaceWith(tablePos, tablePos + tableNode.nodeSize, newTable);
+                      dispatch(transaction);
+                    }
+                  }}
+                  className="px-2 py-0.5 bg-amber-700 hover:bg-amber-800 text-white rounded font-bold text-[11px] transition-colors shadow-2xs"
+                  title="Reverse Order of Columns in this Table (اعكس ترتيب الأعمدة)"
+                >
+                  ⇄ Reverse Columns
+                </button>
+                <button
+                  onClick={() => {
                     const currentDir = editor.getAttributes('table').dir || 'rtl';
                     const nextDir = currentDir === 'rtl' ? 'ltr' : 'rtl';
                     editor.chain().focus().updateAttributes('table', { dir: nextDir }).run();
                   }}
-                  className="px-2 py-0.5 bg-slate-800 hover:bg-amber-900 text-amber-300 rounded font-semibold text-[11px] transition-colors"
-                  title="Flip Table Direction (Right-to-Left / Left-to-Right)"
+                  className="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded font-semibold text-[11px] transition-colors"
+                  title="Toggle Table Direction Attribute (RTL / LTR)"
                 >
-                  ⇄ Flip RTL/LTR
+                  ⇄ {editor.getAttributes('table').dir === 'ltr' ? 'Dir: LTR' : 'Dir: RTL'}
                 </button>
               <div className="w-[1px] h-3.5 bg-slate-700"></div>
               <button

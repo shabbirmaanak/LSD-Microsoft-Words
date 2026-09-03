@@ -836,6 +836,44 @@ export default function Ribbon({
                       + Col
                     </button>
                     <button
+                      onClick={() => {
+                        const { state, dispatch } = editor.view;
+                        const { tr, selection } = state;
+                        let tablePos = null;
+                        let tableNode = null;
+
+                        state.doc.nodesBetween(selection.from, selection.to, (node, pos) => {
+                          if (node.type.name === 'table') {
+                            tablePos = pos;
+                            tableNode = node;
+                            return false;
+                          }
+                        });
+
+                        if (tableNode && tablePos !== null) {
+                          const newRows = [];
+                          tableNode.forEach((rowNode) => {
+                            if (rowNode.type.name === 'tableRow') {
+                              const cells = [];
+                              rowNode.forEach((cellNode) => {
+                                cells.push(cellNode);
+                              });
+                              cells.reverse();
+                              newRows.push(rowNode.type.create(rowNode.attrs, cells));
+                            }
+                          });
+
+                          const newTable = tableNode.type.create(tableNode.attrs, newRows);
+                          const transaction = tr.replaceWith(tablePos, tablePos + tableNode.nodeSize, newTable);
+                          dispatch(transaction);
+                        }
+                      }}
+                      className="bg-amber-100 hover:bg-amber-200 border border-amber-300 text-amber-900 px-2 py-0.5 rounded text-xs font-bold transition-colors shadow-2xs"
+                      title="Reverse Columns in this Table (اعكس ترتيب الأعمدة)"
+                    >
+                      ⇄ Reverse Columns
+                    </button>
+                    <button
                       onClick={() => editor.chain().focus().deleteRow().run()}
                       className="bg-white hover:bg-red-100 border border-red-200 text-red-700 px-2 py-0.5 rounded text-xs font-medium transition-colors"
                       title="Delete Current Row"
