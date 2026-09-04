@@ -97,9 +97,9 @@ export default function Ribbon({
   };
 
   return (
-    <div className="select-none z-30 relative no-print bg-[#f9fbfd] py-1.5 border-b border-[#dadce0]/80" dir="ltr">
+    <div className="select-none z-40 relative no-print bg-[#f9fbfd] py-1.5 border-b border-[#dadce0]/80" dir="ltr">
       {/* Google Docs Floating Rounded Action Toolbar */}
-      <div className="bg-[#edf2fa] rounded-full mx-2 sm:mx-4 px-3 py-1 flex items-center gap-1 sm:gap-1.5 shadow-xs border border-[#dadce0]/60 overflow-x-auto text-xs text-gray-700">
+      <div className="bg-[#edf2fa] rounded-full mx-2 sm:mx-4 px-3 py-1 flex items-center flex-wrap sm:flex-nowrap gap-1 sm:gap-1.5 shadow-xs border border-[#dadce0]/60 overflow-visible text-xs text-gray-700">
         
         {/* Undo / Redo */}
         <button
@@ -276,7 +276,7 @@ export default function Ribbon({
           </button>
 
           {showColorPicker && (
-            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-50 grid grid-cols-10 gap-1 min-w-[240px]">
+            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-[100] grid grid-cols-10 gap-1 min-w-[240px]">
               {colorSwatches.map((color) => (
                 <button
                   key={color}
@@ -311,7 +311,7 @@ export default function Ribbon({
           </button>
 
           {showHighlightPicker && (
-            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-50 flex flex-col gap-2 min-w-[160px]">
+            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-[100] flex flex-col gap-2 min-w-[160px]">
               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Highlight Color</span>
               <div className="grid grid-cols-4 gap-1.5">
                 {highlightSwatches.map((item) => (
@@ -503,7 +503,7 @@ export default function Ribbon({
           </button>
 
           {showWatermarkPopover && (
-            <div className="absolute top-10 right-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-3 z-50 w-72 flex flex-col gap-2.5">
+            <div className="absolute top-10 right-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-3 z-[100] w-72 max-w-[90vw] flex flex-col gap-2.5">
               <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
                 <span className="font-bold text-gray-900 text-xs flex items-center gap-1.5">
                   <Stamp className="w-3.5 h-3.5 text-red-600" />

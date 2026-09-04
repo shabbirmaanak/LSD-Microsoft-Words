@@ -494,10 +494,31 @@ export default function A4EditorCanvas({
             })}
           </div>
 
-          {/* Layer 2: Isolated Watermark */}
+          {/* Layer 2: Isolated Per-Page Watermarks (Never causes scrollbars or layout shifts) */}
           {watermark && (
-            <div className="watermark-text pointer-events-none select-none z-10">
-              {watermark}
+            <div className="absolute inset-0 pointer-events-none select-none z-10 overflow-hidden">
+              {Array.from({ length: validPages }).map((_, idx) => (
+                <div
+                  key={idx}
+                  className="absolute left-0 right-0 flex items-center justify-center pointer-events-none overflow-hidden"
+                  style={{
+                    top: `${idx * pagePxHeight}px`,
+                    height: `${pagePxHeight}px`,
+                  }}
+                >
+                  <span
+                    className="font-extrabold uppercase select-none pointer-events-none whitespace-nowrap text-center tracking-widest"
+                    style={{
+                      transform: 'rotate(-32deg)',
+                      fontSize: 'clamp(2.5rem, 5.5vw, 4.5rem)',
+                      color: 'rgba(0, 0, 0, 0.055)',
+                      maxWidth: '90%',
+                    }}
+                  >
+                    {watermark}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
 
