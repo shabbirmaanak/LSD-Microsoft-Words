@@ -218,6 +218,64 @@ export default function A4EditorCanvas({
       onContentChange(editor.getHTML(), editor.getText());
     },
     editorProps: {
+      handlePaste: (view, event) => {
+        const items = event.clipboardData?.items;
+        if (!items) return false;
+
+        let handled = false;
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          if (item.type.indexOf('image') !== -1) {
+            const file = item.getAsFile();
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const src = e.target?.result;
+                if (src) {
+                  const node = view.state.schema.nodes.image.create({
+                    src: src,
+                    width: '50%',
+                    class: 'align-left',
+                  });
+                  const tr = view.state.tr.replaceSelectionWith(node);
+                  view.dispatch(tr);
+                }
+              };
+              reader.readAsDataURL(file);
+              handled = true;
+            }
+          }
+        }
+        return handled;
+      },
+      handleDrop: (view, event, slice, moved) => {
+        if (!moved && event.dataTransfer?.files?.length) {
+          const files = event.dataTransfer.files;
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            if (file.type.startsWith('image/')) {
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                const src = e.target?.result;
+                if (src) {
+                  const coords = view.posAtCoords({ left: event.clientX, top: event.clientY });
+                  const pos = coords ? coords.pos : view.state.selection.from;
+                  const node = view.state.schema.nodes.image.create({
+                    src: src,
+                    width: '50%',
+                    class: 'align-left',
+                  });
+                  const tr = view.state.tr.insert(pos, node);
+                  view.dispatch(tr);
+                }
+              };
+              reader.readAsDataURL(file);
+              return true;
+            }
+          }
+        }
+        return false;
+      },
       handleKeyDown: (view, event) => {
         const { $from } = view.state.selection;
         const charBefore = $from.nodeBefore?.text ? $from.nodeBefore.text.slice(-1) : '';

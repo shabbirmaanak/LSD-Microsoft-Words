@@ -52,6 +52,21 @@ export default function HeaderBar({
   const [isStarred, setIsStarred] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null); // 'file', 'edit', 'view', 'insert', 'format', 'tools', 'extensions', 'help'
   const menuBarRef = useRef(null);
+  const imageInputRef = useRef(null);
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !editorInstance) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const src = event.target?.result;
+      if (src) {
+        editorInstance.chain().focus().setImage({ src, width: '50%', class: 'align-left' }).run();
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   // Close menus on click outside
   useEffect(() => {
@@ -313,6 +328,15 @@ export default function HeaderBar({
                     >
                       <Calendar className="w-4 h-4" /> Date
                     </button>
+                    <button
+                      onClick={() => {
+                        imageInputRef.current?.click();
+                        setActiveMenu(null);
+                      }}
+                      className="w-full text-left px-4 py-1.5 hover:bg-[#e8f0fe] hover:text-[#1a73e8] flex items-center gap-2"
+                    >
+                      <Image className="w-4 h-4 text-purple-600" /> Image (Upload / Paste)
+                    </button>
                     <div className="h-[1px] bg-gray-200 my-1"></div>
                     <button
                       onClick={() => {
@@ -325,6 +349,14 @@ export default function HeaderBar({
                     </button>
                   </div>
                 )}
+                {/* Hidden File Input for Image Insertion */}
+                <input 
+                  type="file" 
+                  ref={imageInputRef} 
+                  onChange={handleImageFileChange} 
+                  accept="image/*" 
+                  className="hidden" 
+                />
               </div>
 
               {/* FORMAT MENU */}
