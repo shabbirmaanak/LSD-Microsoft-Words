@@ -75,7 +75,7 @@ export default function HeaderBar({
   };
 
   return (
-    <header className="bg-white border-b border-[#dadce0] select-none text-gray-800 z-40 relative no-print">
+    <header className="bg-white border-b border-[#dadce0] select-none text-gray-800 z-50 relative no-print">
       {/* Top Main Navigation Bar */}
       <div className="flex items-center justify-between px-3 sm:px-4 pt-2 pb-1 gap-2">
         {/* Left Section: Google Docs Icon + Document Title + Star + Cloud Status + Menus */}

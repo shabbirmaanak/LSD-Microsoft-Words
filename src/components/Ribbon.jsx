@@ -97,7 +97,7 @@ export default function Ribbon({
   };
 
   return (
-    <div className="select-none z-40 relative no-print bg-[#f9fbfd] py-1.5 border-b border-[#dadce0]/80" dir="ltr">
+    <div className="select-none z-30 relative no-print bg-[#f9fbfd] py-1.5 border-b border-[#dadce0]/80" dir="ltr">
       {/* Google Docs Floating Rounded Action Toolbar */}
       <div className="bg-[#edf2fa] rounded-full mx-2 sm:mx-4 px-3 py-1 flex items-center flex-wrap sm:flex-nowrap gap-1 sm:gap-1.5 shadow-xs border border-[#dadce0]/60 overflow-visible text-xs text-gray-700">
         
