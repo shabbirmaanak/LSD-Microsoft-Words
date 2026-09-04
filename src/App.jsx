@@ -285,32 +285,30 @@ export default function App() {
     setEditorText(text);
   };
 
-  // Export to PDF safely with dynamic import (Direct Print Ready)
-  const handleExportPDF = async () => {
-    const element = document.getElementById('letter-paper-canvas');
-    if (!element) return;
+  // Export to High-Definition Vector PDF (Preserves 100% of Arabic/LSD Fonts, RTL & Formatting)
+  const handleExportPDF = () => {
+    const originalTitle = document.title;
+    const cleanTitle = (docTitle || 'Document').replace(/\.(docx|doc|txt)$/i, '');
+    document.title = cleanTitle;
 
-    try {
-      const html2pdfModule = (await import('html2pdf.js')).default;
-      const opt = {
-        margin:       [10, 10, 10, 10],
-        filename:     (docTitle || 'document').replace(/\.(docx|doc|txt)$/i, '') + '.pdf',
-        image:        { type: 'jpeg', quality: 0.99 },
-        html2canvas:  { scale: 2, useCORS: true, logging: false, letterRendering: true, scrollY: 0 },
-        pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] },
-        jsPDF:        { unit: 'mm', format: (pageSize || 'a4').toLowerCase(), orientation: orientation || 'portrait' }
-      };
+    // Use native browser high-fidelity vector PDF generation
+    window.print();
 
-      await html2pdfModule().set(opt).from(element).save();
-    } catch (err) {
-      console.error('PDF export failed, falling back to system print:', err);
-      window.print();
-    }
+    // Restore title
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
   };
 
   // Browser Print
   const handlePrint = () => {
+    const originalTitle = document.title;
+    const cleanTitle = (docTitle || 'Document').replace(/\.(docx|doc|txt)$/i, '');
+    document.title = cleanTitle;
     window.print();
+    setTimeout(() => {
+      document.title = originalTitle;
+    }, 1500);
   };
 
   // Create New Letter

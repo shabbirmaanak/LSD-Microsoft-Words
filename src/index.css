@@ -397,16 +397,17 @@ table[dir="ltr"] td,
   clear: both !important;
 }
 
-/* Print Styles */
+/* High-Definition Print Styles (Vector PDF Output) */
 @media print {
   @page {
-    size: auto;
-    margin: 15mm 15mm 15mm 15mm;
+    size: A4 portrait;
+    margin: 12mm 15mm;
   }
 
   *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
 
   html, body {
@@ -417,6 +418,9 @@ table[dir="ltr"] td,
     width: 100% !important;
     height: auto !important;
     overflow: visible !important;
+    font-family: inherit !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: optimizeLegibility !important;
   }
 
   /* Reset layout transforms and wrappers */
@@ -480,6 +484,18 @@ table[dir="ltr"] td,
     overflow: visible !important;
     padding: 0 !important;
     margin: 0 !important;
+    font-size: 12pt;
+    line-height: 1.8;
+  }
+
+  .ProseMirror[dir="rtl"] {
+    text-align: right !important;
+    direction: rtl !important;
+  }
+
+  .ProseMirror[dir="ltr"] {
+    text-align: left !important;
+    direction: ltr !important;
   }
 
   /* Natural page pagination */
