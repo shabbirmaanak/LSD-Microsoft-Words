@@ -436,7 +436,7 @@ export default function A4EditorCanvas({
   }, [editor]);
 
   return (
-    <div className={`flex-1 bg-[#e8ecef] overflow-auto relative flex flex-col items-center py-6 px-4 select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
+    <div className={`flex-1 bg-[#e8ecef] print:bg-white print:p-0 print:m-0 print:overflow-visible overflow-auto relative flex flex-col items-center py-6 px-4 select-text ${textDirection === 'rtl' ? 'rtl-editor' : 'ltr-editor'}`}>
       
       {/* Top Horizontal Ruler (Hidden on print and mobile) */}
       <div 
@@ -455,16 +455,16 @@ export default function A4EditorCanvas({
         <span>٨</span>
       </div>
 
-      {/* Paper Container with Zoom Scaling */}
+      {/* Paper Container with Zoom Scaling (Reset in Print) */}
       <div 
-        className="w-full transition-all origin-top duration-150 ease-out flex justify-center"
+        className="w-full print:w-full print:max-w-none print:transform-none transition-all origin-top duration-150 ease-out flex justify-center"
         style={{ 
           maxWidth: `${pagePxWidth}px`,
           transform: `scale(${zoomLevel / 100})` 
         }}
       >
         <div 
-          className="relative w-full"
+          className="relative w-full print:w-full print:max-w-none"
           style={{ 
             width: `${pagePxWidth}px`,
             maxWidth: `${pagePxWidth}px`,

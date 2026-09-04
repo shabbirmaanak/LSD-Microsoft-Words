@@ -423,7 +423,7 @@ table[dir="ltr"] td,
     text-rendering: optimizeLegibility !important;
   }
 
-  /* Reset layout transforms and wrappers */
+  /* Reset layout transforms, backgrounds and wrappers in print */
   #root, 
   main, 
   .flex-1 {
@@ -431,11 +431,12 @@ table[dir="ltr"] td,
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     overflow: visible !important;
     background: transparent !important;
+    background-color: transparent !important;
     transform: none !important;
-    max-width: 100% !important;
     box-shadow: none !important;
   }
 
@@ -467,10 +468,12 @@ table[dir="ltr"] td,
     min-height: 0 !important;
     height: auto !important;
     background: transparent !important;
+    background-color: transparent !important;
     position: static !important;
     overflow: visible !important;
     page-break-after: auto !important;
     break-after: auto !important;
+    transform: none !important;
   }
 
   .paper-margin-guide {
