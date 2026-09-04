@@ -527,7 +527,7 @@ export default function A4EditorCanvas({
             ref={paperRef}
             id="letter-paper-canvas"
             dir={textDirection}
-            className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} transition-all relative overflow-hidden`}
+            className={`a4-paper paper-margin-guide ${marginPaddingMap[margins] || 'p-16'} print:p-0 print:m-0 print:overflow-visible print:min-h-0 print:h-auto transition-all relative overflow-hidden`}
             style={{ 
               width: `${pagePxWidth}px`,
               minHeight: `${validPages * pagePxHeight}px`,

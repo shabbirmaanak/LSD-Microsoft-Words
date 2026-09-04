@@ -397,11 +397,11 @@ table[dir="ltr"] td,
   clear: both !important;
 }
 
-/* High-Definition Print Styles (Vector PDF Output) */
+/* High-Definition Print Styles (Multi-Page Vector PDF Output) */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 12mm 15mm;
+    margin: 15mm 15mm 15mm 15mm;
   }
 
   *, *::before, *::after {
@@ -417,23 +417,31 @@ table[dir="ltr"] td,
     padding: 0 !important;
     width: 100% !important;
     height: auto !important;
+    min-height: 100% !important;
     overflow: visible !important;
     font-family: inherit !important;
     -webkit-font-smoothing: antialiased !important;
     text-rendering: optimizeLegibility !important;
   }
 
-  /* Reset layout transforms, backgrounds and wrappers in print */
+  /* Reset layout transforms, heights, backgrounds and wrappers in print */
   #root, 
+  #root > div,
+  .h-screen,
+  .flex-col,
+  .overflow-hidden,
   main, 
   .flex-1 {
     display: block !important;
+    position: static !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
     background: transparent !important;
     background-color: transparent !important;
     transform: none !important;
@@ -473,12 +481,15 @@ table[dir="ltr"] td,
     overflow: visible !important;
     page-break-after: auto !important;
     break-after: auto !important;
+    page-break-inside: auto !important;
+    break-inside: auto !important;
     transform: none !important;
   }
 
   .paper-margin-guide {
     outline: none !important;
     padding: 0 !important;
+    border: none !important;
   }
 
   .ProseMirror {
@@ -489,6 +500,8 @@ table[dir="ltr"] td,
     margin: 0 !important;
     font-size: 12pt;
     line-height: 1.8;
+    width: 100% !important;
+    background: transparent !important;
   }
 
   .ProseMirror[dir="rtl"] {
@@ -501,14 +514,22 @@ table[dir="ltr"] td,
     direction: ltr !important;
   }
 
-  /* Natural page pagination */
+  /* Natural multi-page block pagination */
   .ProseMirror p, 
   .ProseMirror h1, 
   .ProseMirror h2, 
   .ProseMirror h3,
-  .ProseMirror table {
-    page-break-inside: auto;
-    break-inside: auto;
+  .ProseMirror ul,
+  .ProseMirror ol,
+  .ProseMirror table,
+  .ProseMirror blockquote {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+  }
+
+  .ProseMirror li {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   .ProseMirror tr {

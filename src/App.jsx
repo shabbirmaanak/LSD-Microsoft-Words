@@ -483,7 +483,7 @@ export default function App() {
   const charCount = editorText ? editorText.length : 0;
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-gray-100 font-office" dir="ltr">
+    <div className="flex flex-col h-screen print:h-auto print:min-h-0 print:overflow-visible print:block overflow-hidden bg-gray-100 font-office" dir="ltr">
       
       {/* 1. Google Docs Top Header Bar & Menus */}
       <HeaderBar
