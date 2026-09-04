@@ -21,18 +21,22 @@ const LsdKeyMappings = Extension.create({
   name: 'lsdKeyMappings',
   addInputRules() {
     return [
-      textInputRule({ find: /pp$/i, replace: 'چ' }),
-      textInputRule({ find: /حح$/i, replace: 'چ' }),
-      textInputRule({ find: /;;$/i, replace: 'گ' }),
-      textInputRule({ find: /كك$/i, replace: 'گ' }),
-      textInputRule({ find: /ee$/i, replace: 'پ' }),
-      textInputRule({ find: /ثث$/i, replace: 'پ' }),
       textInputRule({ find: /ss$/i, replace: 'ے' }),
       textInputRule({ find: /سس$/i, replace: 'ے' }),
+      textInputRule({ find: /ee$/i, replace: 'پ' }),
+      textInputRule({ find: /ثث$/i, replace: 'پ' }),
+      textInputRule({ find: /;;$/i, replace: 'گ' }),
+      textInputRule({ find: /كك$/i, replace: 'گ' }),
+      textInputRule({ find: /pp$/i, replace: 'چ' }),
+      textInputRule({ find: /حح$/i, replace: 'چ' }),
       textInputRule({ find: /qq$/i, replace: 'ٹ' }),
       textInputRule({ find: /ضض$/i, replace: 'ٹ' }),
       textInputRule({ find: /ww$/i, replace: 'ں' }),
       textInputRule({ find: /صص$/i, replace: 'ں' }),
+      textInputRule({ find: /''$/i, replace: 'ں' }),
+      textInputRule({ find: /‘'$/i, replace: 'ں' }),
+      textInputRule({ find: /""$/i, replace: 'ں' }),
+      textInputRule({ find: /\/\/$/i, replace: '؍' }),
       textInputRule({ find: /hh$/i, replace: 'ھ' }),
       textInputRule({ find: /هه$/i, replace: 'ھ' }),
     ];
@@ -265,6 +269,21 @@ export default function A4EditorCanvas({
               (event.key === 'ص' && (charBefore === 'ص' || charBefore.toLowerCase() === 'w')) ||
               (event.key === 'ں' && charBefore === 'ں')) {
             const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ں');
+            view.dispatch(tr);
+            return true;
+          }
+          // '' OR "" OR ‘’ => ں (Noon Ghunna)
+          if ((event.key === "'" && (charBefore === "'" || charBefore === '‘' || charBefore === '’')) ||
+              (event.key === '"' && (charBefore === '"' || charBefore === '“' || charBefore === '”')) ||
+              (event.key === '’' && (charBefore === '‘' || charBefore === "'"))) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('ں');
+            view.dispatch(tr);
+            return true;
+          }
+          // / + / OR ظ + ظ => ؍ (Arabic Date / Sanah sign)
+          if ((event.key === '/' && charBefore === '/') ||
+              (event.key === 'ظ' && charBefore === 'ظ')) {
+            const tr = view.state.tr.delete($from.pos - 1, $from.pos).insertText('؍');
             view.dispatch(tr);
             return true;
           }

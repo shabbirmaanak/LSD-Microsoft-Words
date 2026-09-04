@@ -188,7 +188,7 @@ export default function ArabicKeyboard({ isOpen, onClose, onInsertChar }) {
       {/* Spacebar & Actions */}
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-700 text-xs">
         <span className="text-[10px] sm:text-[11px] text-slate-300 font-serif">
-          Alkanz/Amiri Mappings: <span className="text-amber-300 font-bold">pp=چ, ;;=گ, ee=پ, ss=ے, h=ھ, ‘=چهے</span>
+          Alkanz/Amiri Mappings: <span className="text-amber-300 font-bold">ss=ے, ee=پ, ;;=گ, pp=چ, qq=ٹ, ww=ں, ‘’=ں, //=؍</span>
         </span>
         <button
           onClick={() => onInsertChar(' ')}
