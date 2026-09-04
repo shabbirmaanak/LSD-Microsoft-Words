@@ -63,6 +63,27 @@ const CustomImage = Image.extend({
       title: {
         default: null,
       },
+      referrerpolicy: {
+        default: 'no-referrer',
+        renderHTML: () => ({
+          referrerpolicy: 'no-referrer',
+        }),
+        parseHTML: () => 'no-referrer',
+      },
+      crossorigin: {
+        default: 'anonymous',
+        renderHTML: () => ({
+          crossorigin: 'anonymous',
+        }),
+        parseHTML: () => 'anonymous',
+      },
+      loading: {
+        default: 'eager',
+        renderHTML: () => ({
+          loading: 'eager',
+        }),
+        parseHTML: () => 'eager',
+      },
       width: {
         default: '40%',
         renderHTML: (attributes) => {
@@ -218,35 +239,95 @@ export default function A4EditorCanvas({
       onContentChange(editor.getHTML(), editor.getText());
     },
     editorProps: {
+      transformPastedHTML: (html) => {
+        if (!html) return html;
+        return html.replace(/<img\b([^>]*)>/gi, (match) => {
+          let updated = match;
+          if (!updated.includes('referrerpolicy')) {
+            updated = updated.replace('<img', '<img referrerpolicy="no-referrer" crossorigin="anonymous"');
+          }
+          return updated;
+        });
+      },
       handlePaste: (view, event) => {
-        const items = event.clipboardData?.items;
-        if (!items) return false;
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return false;
 
-        let handled = false;
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          if (item.type.indexOf('image') !== -1) {
-            const file = item.getAsFile();
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                const src = e.target?.result;
-                if (src) {
-                  const node = view.state.schema.nodes.image.create({
-                    src: src,
-                    width: '50%',
-                    class: 'align-left',
-                  });
-                  const tr = view.state.tr.replaceSelectionWith(node);
-                  view.dispatch(tr);
-                }
-              };
-              reader.readAsDataURL(file);
-              handled = true;
+        // 1. Direct Image Files (from screenshot, copied image file, OS clipboard)
+        const files = Array.from(clipboardData.files || []);
+        const imageFiles = files.filter(f => f.type.startsWith('image/'));
+        if (imageFiles.length > 0) {
+          event.preventDefault();
+          imageFiles.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target?.result;
+              if (src) {
+                const node = view.state.schema.nodes.image.create({
+                  src: src,
+                  width: '50%',
+                  class: 'align-left',
+                  referrerpolicy: 'no-referrer',
+                });
+                const tr = view.state.tr.replaceSelectionWith(node);
+                view.dispatch(tr);
+              }
+            };
+            reader.readAsDataURL(file);
+          });
+          return true;
+        }
+
+        // 2. Clipboard Items (copied image item)
+        const items = Array.from(clipboardData.items || []);
+        const imageItem = items.find(item => item.type.startsWith('image/'));
+        if (imageItem) {
+          const file = imageItem.getAsFile();
+          if (file) {
+            event.preventDefault();
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const src = e.target?.result;
+              if (src) {
+                const node = view.state.schema.nodes.image.create({
+                  src: src,
+                  width: '50%',
+                  class: 'align-left',
+                  referrerpolicy: 'no-referrer',
+                });
+                const tr = view.state.tr.replaceSelectionWith(node);
+                view.dispatch(tr);
+              }
+            };
+            reader.readAsDataURL(file);
+            return true;
+          }
+        }
+
+        // 3. HTML containing images (e.g. copied from Gemini, ChatGPT, Google Docs, or web pages)
+        const html = clipboardData.getData('text/html');
+        if (html && /<img\b[^>]*src=["']?([^"'>\s]+)/i.test(html)) {
+          const match = html.match(/<img\b[^>]*src=["']?([^"'>\s]+)["']?[^>]*>/i);
+          if (match) {
+            const src = match[1];
+            const text = clipboardData.getData('text/plain')?.trim();
+            // If the paste is solely or mostly an image (like Gemini's copied image which puts alt text ", AI generated")
+            if (!text || text.length < 60 || text.includes('AI generated')) {
+              event.preventDefault();
+              const node = view.state.schema.nodes.image.create({
+                src: src,
+                width: '50%',
+                class: 'align-left',
+                referrerpolicy: 'no-referrer',
+              });
+              const tr = view.state.tr.replaceSelectionWith(node);
+              view.dispatch(tr);
+              return true;
             }
           }
         }
-        return handled;
+
+        return false;
       },
       handleDrop: (view, event, slice, moved) => {
         if (!moved && event.dataTransfer?.files?.length) {
