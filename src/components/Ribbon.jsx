@@ -276,21 +276,37 @@ export default function Ribbon({
           </button>
 
           {showColorPicker && (
-            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-2.5 z-[100] grid grid-cols-10 gap-1 min-w-[240px]">
-              {colorSwatches.map((color) => (
+            <div className="absolute top-10 left-0 bg-white border border-gray-300 rounded-xl shadow-2xl p-3 z-[100] flex flex-col gap-2 min-w-[260px]">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-1.5">
+                <span className="text-[11px] font-bold text-gray-700 uppercase tracking-wider">Text Color</span>
                 <button
-                  key={color}
                   type="button"
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() => {
-                    editor.chain().focus().setColor(color).run();
+                    editor.chain().focus().unsetColor().run();
                     setShowColorPicker(false);
                   }}
-                  className="w-4.5 h-4.5 rounded-full border border-gray-300 hover:scale-125 transition-transform"
-                  style={{ backgroundColor: color }}
-                  title={color}
-                />
-              ))}
+                  className="text-[10px] text-blue-600 hover:underline font-semibold"
+                >
+                  Reset (Black)
+                </button>
+              </div>
+              <div className="grid grid-cols-10 gap-1.5">
+                {colorSwatches.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => {
+                      editor.chain().focus().setColor(color).run();
+                      setShowColorPicker(false);
+                    }}
+                    className="w-5 h-5 rounded-full border border-gray-300 hover:scale-125 transition-transform shadow-2xs cursor-pointer"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </div>
